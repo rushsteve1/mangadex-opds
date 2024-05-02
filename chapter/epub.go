@@ -41,6 +41,11 @@ func (c Chapter) WriteEpub(ctx context.Context, w io.Writer) (err error) {
 		})
 	}
 
+	err = eg.Wait()
+	if err != nil {
+		return err
+	}
+
 	err = c.writeMetadata(z)
 
 	return err

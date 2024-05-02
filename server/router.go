@@ -7,7 +7,9 @@ import (
 	"path"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/chapter"
+	"github.com/rushsteve1/mangadex-opds/manga"
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
@@ -16,16 +18,19 @@ func Router() *http.ServeMux {
 
 	mux.HandleFunc("/", indexHandler)
 
-	mux.HandleFunc("/manga/search", todo)
+	mux.HandleFunc("/root", AcceptXML(rootHandler))
+
+	mux.HandleFunc("/search", AcceptXML(searchHandler))
+
 	mux.HandleFunc("/manga/{id}", todo)
 
 	mux.HandleFunc("/chapter/{id}", todo)
 
-	eh := AcceptsMiddleware(epubHandler, mime.TypeByExtension(".epub"))
+	eh := AcceptMiddleware(epubHandler, mime.TypeByExtension(".epub"))
 	mux.HandleFunc("/chapter/{id}/epub", eh)
 
 	// TODO I don't think this mimetype is quite right, add more
-	ch := AcceptsMiddleware(cbzHandler, mime.TypeByExtension(".cbz"))
+	ch := AcceptMiddleware(cbzHandler, mime.TypeByExtension(".cbz"))
 	mux.HandleFunc("/chapter/{id}/cbz", ch)
 
 	outerMux := http.NewServeMux()
@@ -47,6 +52,40 @@ func todo(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "not implemented", http.StatusNotImplemented)
 }
 
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	err := rootTemplate(w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func searchHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", mime.TypeByExtension(".xml"))
+
+	// Return the opensearch XML document
+	if len(r.URL.Query()) == 0 {
+
+		data, err := tmplFS.ReadFile("templates/opensearch.xml")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		w.Write(data)
+		return
+	}
+
+	// Otherwise return the OPDS XML list for the search
+	resp, err := manga.Search(r.Context(), r.URL.Query())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = manga.MangaListFeed(w, resp, r.URL.Path)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func chapterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("page") {
 		imageHandler(w, r)
@@ -59,19 +98,26 @@ func chapterHandler(w http.ResponseWriter, r *http.Request) {
 // Implement support for OPDS-PSE 1.0
 // https://github.com/anansi-project/opds-pse/blob/master/v1.0.md
 func imageHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "invalid uuid", http.StatusBadRequest)
+	}
+
 	pageStr := r.URL.Query().Get("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// By checking this now we avoid the trips to the API
 	if page < 0 {
 		http.Error(w, "page must be > 0", http.StatusBadRequest)
+		return
 	}
 
 	// TODO we probably want to be able to differentiate upstream errors from network errors
-	c, err := chapter.Fetch(r.Context(), r.PathValue("id"), r.URL.Query())
+	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -100,7 +146,12 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func epubHandler(w http.ResponseWriter, r *http.Request) {
-	c, err := chapter.Fetch(r.Context(), r.PathValue("id"), r.URL.Query())
+	id, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "invalid uuid", http.StatusBadRequest)
+	}
+
+	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -118,7 +169,12 @@ func epubHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func cbzHandler(w http.ResponseWriter, r *http.Request) {
-	c, err := chapter.Fetch(r.Context(), r.PathValue("id"), r.URL.Query())
+	id, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "invalid uuid", http.StatusBadRequest)
+	}
+
+	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

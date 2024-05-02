@@ -2,3 +2,4 @@
 .vscode/
 *.cbz
 *.epub
+tmp/

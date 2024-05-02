@@ -18,6 +18,16 @@ var APIUrl = url.URL{
 	Host:   "api.mangadex.org",
 }
 
+var DevUrl = url.URL{
+	Scheme: "https",
+	Host:   "api.mangadex.dev",
+}
+
+var UploadsURL = url.URL{
+	Scheme: "https",
+	Host:   "uploads.mangadex.org",
+}
+
 // UserAgent constructs the `User-Agent` header from the build information.
 func UserAgent() string {
 	info, ok := debug.ReadBuildInfo()
@@ -34,7 +44,13 @@ func UserAgent() string {
 
 // QueryAPI is used to fetch data from the MangaDex API.
 func QueryAPI[T any](ctx context.Context, queryPath string, queryParams url.Values) (out T, err error) {
-	queryUrl := APIUrl
+	var queryUrl url.URL
+	if GlobalOptions.DevApi {
+		queryUrl = DevUrl
+	} else {
+		queryUrl = APIUrl
+	}
+
 	queryUrl.Path = queryPath
 	queryUrl.RawQuery = queryParams.Encode()
 
@@ -90,4 +106,24 @@ func makeRequest(ctx context.Context, queryUrl *url.URL) (req *http.Request, err
 	req.Header.Set("User-Agent", UserAgent())
 
 	return req, nil
+}
+
+// TODO make this more general so it can be used for Chapters
+func WithDefaultParams(queryParams url.Values) url.Values {
+	if queryParams == nil {
+		queryParams = url.Values{}
+	}
+
+	// Use reference expansion
+	// https://api.mangadex.org/docs/01-concepts/reference-expansion/
+	// TODO optimize these
+	defaultParams := url.Values{
+		"includes[]": []string{"author", "artist", "cover_art"},
+	}
+
+	for k, v := range defaultParams {
+		queryParams[k] = v
+	}
+
+	return queryParams
 }

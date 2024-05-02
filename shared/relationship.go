@@ -5,9 +5,9 @@ import (
 )
 
 type Relationship struct {
-	ID         string            `json:"id"`
-	Type       string            `json:"type"`
-	Attributes map[string]string `json:"attributes"`
+	ID         string         `json:"id"`
+	Type       string         `json:"type"`
+	Attributes map[string]any `json:"attributes"`
 }
 
 func (r Relationship) URL() url.URL {

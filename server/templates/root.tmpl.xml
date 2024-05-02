@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>urn:uuid:{{ .ID }}</id>
+
+    <link rel="self" href="/catalogs/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="start" href="/catalogs/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="search" href="/search" type="application/opensearchdescription+xml"/>
+
+    <title>OPDS Catalog Root Example</title>
+    <updated>{{ .UpdatedAt }}</updated>
+    <author>
+        <name>mangadex-opds</name>
+        <uri>https://github.com/rushsteve1/mangadex-opds</uri>
+    </author>
+
+    <entry>
+        <title>Popular Manga</title>
+        <link rel="http://opds-spec.org/sort/popular" href="/catalogs/popular" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+        <updated>{{ .UpdatedAt }}</updated>
+        <id>urn:uuid:{{ .ID }}</id>
+        <content type="text">Popular manga from MangaDex.</content>
+    </entry>
+    <entry>
+        <title>New Manga</title>
+        <link rel="http://opds-spec.org/sort/new" href="/catalogs/new" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+        <updated>{{ .UpdatedAt }}</updated>
+        <id>urn:uuid:{{ .ID }}</id>
+        <content type="text">Newly added manga on MangaDex.</content>
+    </entry>
+    <entry>
+        <title>Recently Updated Manga</title>
+        <link rel="subsection" href="/catalogs/updated" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+        <updated>{{ .UpdatedAt }}</updated>
+        <id>urn:uuid:{{ .ID }}</id>
+        <content type="text">Recently updated manga on MangaDex.</content>
+    </entry>
+</feed>

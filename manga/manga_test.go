@@ -3,6 +3,8 @@ package manga
 import (
 	"context"
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 // Bocchi's Guide to MangaDex
@@ -10,7 +12,7 @@ const MangaID = "d1c0d3f9-f359-467c-8474-0b2ea8e06f3d"
 
 func Test_Fetch(t *testing.T) {
 	ctx := context.Background()
-	m, err := Fetch(ctx, MangaID, nil)
+	m, err := Fetch(ctx, uuid.MustParse(MangaID), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +24,7 @@ func Test_Fetch(t *testing.T) {
 
 func Test_Feed(t *testing.T) {
 	ctx := context.Background()
-	m := Manga{ID: MangaID}
+	m := Manga{ID: uuid.MustParse(MangaID)}
 
 	chapters, err := m.Feed(ctx, nil)
 	if err != nil {

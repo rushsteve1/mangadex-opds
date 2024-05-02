@@ -40,16 +40,21 @@ func HtmlXmlSplitterMiddleware(htmlNext http.HandlerFunc, xmlNext http.HandlerFu
 	}
 }
 
-func AcceptsMiddleware(next http.HandlerFunc, mtypes ...string) http.HandlerFunc {
+func AcceptMiddleware(next http.HandlerFunc, mtypes ...string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		accepts := r.Header.Get("Accepts")
+		accepts := r.Header.Get("Accept")
 		if containsAny(accepts, mtypes...) {
 			next(w, r)
+			return
 		}
 
-		resp := fmt.Sprintf("accepts header must contain one of %v", mtypes)
+		resp := fmt.Sprintf("accept header must contain one of %v", mtypes)
 		http.Error(w, resp, http.StatusNotAcceptable)
 	}
+}
+
+func AcceptXML(next http.HandlerFunc) http.HandlerFunc {
+	return AcceptMiddleware(next, mime.TypeByExtension(".xml"))
 }
 
 func containsAny(s string, ss ...string) bool {

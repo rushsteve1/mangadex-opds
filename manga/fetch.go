@@ -5,32 +5,20 @@ import (
 	"log/slog"
 	"net/url"
 
+	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/chapter"
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
-func Fetch(ctx context.Context, id shared.UUID, queryParams url.Values) (m Manga, err error) {
+func Fetch(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Manga, err error) {
 	slog.InfoContext(ctx, "fetching manga", "id", id)
 
-	queryPath, err := url.JoinPath("manga", id)
+	queryPath, err := url.JoinPath("manga", id.String())
 	if err != nil {
 		return m, err
 	}
 
-	if queryParams == nil {
-		queryParams = url.Values{}
-	}
-
-	// Use reference expansion
-	// https://api.mangadex.org/docs/01-concepts/reference-expansion/
-	// TODO optimize these
-	defaultParams := url.Values{
-		"includes[]": []string{"author", "artist", "cover_art"},
-	}
-
-	for k, v := range defaultParams {
-		queryParams[k] = v
-	}
+	queryParams = shared.WithDefaultParams(queryParams)
 
 	data, err := shared.QueryAPI[shared.Data[Manga]](ctx, queryPath, queryParams)
 
@@ -38,13 +26,15 @@ func Fetch(ctx context.Context, id shared.UUID, queryParams url.Values) (m Manga
 }
 
 func Search(ctx context.Context, queryParams url.Values) (ms []Manga, err error) {
+	queryParams = shared.WithDefaultParams(queryParams)
+
 	data, err := shared.QueryAPI[shared.Data[[]Manga]](ctx, "manga", queryParams)
 
 	return data.Data, err
 }
 
 func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []chapter.Chapter, err error) {
-	queryPath, err := url.JoinPath("manga", m.ID, "feed")
+	queryPath, err := url.JoinPath("manga", m.ID.String(), "feed")
 	if err != nil {
 		return nil, err
 	}

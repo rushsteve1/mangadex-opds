@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 // Girl's Last Tour chapter 43 uploaded by rozen
@@ -12,7 +14,7 @@ const ChapterID = "9a612118-1441-431a-979d-85958fb20cf2"
 func Test_Fetch(t *testing.T) {
 	ctx := context.Background()
 
-	c, err := Fetch(ctx, ChapterID, nil)
+	c, err := Fetch(ctx, uuid.MustParse(ChapterID), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +26,7 @@ func Test_Fetch(t *testing.T) {
 
 func Test_FetchImageURLs(t *testing.T) {
 	ctx := context.Background()
-	c := Chapter{ID: ChapterID}
+	c := Chapter{ID: uuid.MustParse(ChapterID)}
 
 	imgUrls, err := c.FetchImageURLs(ctx)
 	if err != nil {
@@ -38,7 +40,7 @@ func Test_FetchImageURLs(t *testing.T) {
 
 func Test_WriteEpub(t *testing.T) {
 	ctx := context.Background()
-	c := Chapter{ID: ChapterID}
+	c := Chapter{ID: uuid.MustParse(ChapterID)}
 
 	file, err := os.CreateTemp("", "*.epub")
 	if err != nil {

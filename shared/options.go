@@ -9,8 +9,17 @@ type Options struct {
 	Query     url.Values
 	DataSaver bool
 	MDUploads bool
+	DevApi    bool
 }
 
 func ReadOptionsFromEnv() (o Options, err error) {
 	return o, err
+}
+
+func TestOptions() Options {
+	return Options{
+		Language:  "en",
+		DataSaver: true,
+		DevApi:    true,
+	}
 }

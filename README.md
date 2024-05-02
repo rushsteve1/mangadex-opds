@@ -13,7 +13,7 @@ We want to be respectful of MangaDex and their
 - Easy to self-host
 - Easy to understand and hack on
 - Easy to configure with env vars
-- Minimal dependencies (just Go stdlib and `golang.org/x/`)
+- Minimal dependencies
 - Reasonably performant
 - Minimal system requirements
 - Implement the OPDS standard closely

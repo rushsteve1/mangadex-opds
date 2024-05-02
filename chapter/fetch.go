@@ -5,14 +5,15 @@ import (
 	"log/slog"
 	"net/url"
 
+	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
 // Fetch gets the chapter information the MangaDex API and returns the [Chapter].
-func Fetch(ctx context.Context, id shared.UUID, queryParams url.Values) (c Chapter, err error) {
+func Fetch(ctx context.Context, id uuid.UUID, queryParams url.Values) (c Chapter, err error) {
 	slog.InfoContext(ctx, "fetching chapter", "id", id)
 
-	queryPath, err := url.JoinPath("chapter", id)
+	queryPath, err := url.JoinPath("chapter", id.String())
 	if err != nil {
 		return c, err
 	}
@@ -60,7 +61,7 @@ func (c Chapter) FetchImageURLs(ctx context.Context) (imgUrls []*url.URL, err er
 
 	slog.InfoContext(ctx, "fetching image urls for chapter", "id", c.ID)
 
-	queryPath, err := url.JoinPath("at-home", "server", c.ID)
+	queryPath, err := url.JoinPath("at-home", "server", c.ID.String())
 	if err != nil {
 		return nil, err
 	}

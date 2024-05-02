@@ -1,12 +1,15 @@
 package shared
 
-// This is a simple type alias but it makes it clearer that
-// the string should not be treated like a normal string
-type UUID = string
+import "cmp"
 
 type Data[T any] struct {
 	Result string `json:"result"`
 	Data   T      `json:"data"`
 	Limit  int    `json:"limit"`
 	Offset int    `json:"offset"`
+}
+
+func Tr(m map[string]string) string {
+	lang := cmp.Or(GlobalOptions.Language, "en")
+	return cmp.Or(m[lang], m["en"])
 }

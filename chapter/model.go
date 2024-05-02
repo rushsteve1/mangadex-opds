@@ -4,11 +4,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rushsteve1/mangadex-opds/shared"
+	"github.com/google/uuid"
 )
 
 type Chapter struct {
-	ID         shared.UUID       `json:"id"`
+	ID         uuid.UUID       `json:"id"`
 	Attributes ChapterAttributes `json:"attributes"`
 	// Relationships []shared.Relationship `json:"relationships"`
 }
