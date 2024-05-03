@@ -6,13 +6,18 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
 //go:embed templates
 var tmplFS embed.FS
 var tmpl = template.Must(template.ParseFS(tmplFS, "templates/*"))
+
+//go:embed favicon.ico
+var favicon []byte
+
+//go:embed robots.txt
+var robotstxt []byte
 
 type indexData struct {
 	Host string
@@ -27,15 +32,13 @@ func indexTemplate(w io.Writer) error {
 }
 
 type rootData struct {
-	ID        uuid.UUID
 	UpdatedAt string
 	Host      string
 }
 
 func rootTemplate(w io.Writer) error {
 	data := rootData{
-		ID:        uuid.New(),
-		UpdatedAt: time.Now().Format(time.RFC3339),
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339Nano),
 		Host:      shared.GlobalOptions.Host.String(),
 	}
 

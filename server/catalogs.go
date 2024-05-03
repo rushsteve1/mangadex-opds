@@ -14,7 +14,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func catalogSearchHandler(term string, order string) http.HandlerFunc {
+func catalogSearchHandler(id string, title string, term string, order string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		params.Add(fmt.Sprintf("order[%s]", term), order)
@@ -25,13 +25,28 @@ func catalogSearchHandler(term string, order string) http.HandlerFunc {
 			return
 		}
 
-		err = manga.MangaListFeed(w, m, r.URL.Path)
+		err = manga.MangaListFeed(w, id, title, m, r.URL.Path)
 		if err != nil {
 			die(w, r, err)
 		}
 	}
 }
 
-var newCatalogHandler = catalogSearchHandler("createdAt", "desc")
-var popularCatalogHandler = catalogSearchHandler("followedCount", "desc")
-var updatedCatalogHandler = catalogSearchHandler("latestUploadedChapter", "desc")
+var newCatalogHandler = catalogSearchHandler(
+	"new",
+	"New Manga",
+	"createdAt",
+	"desc",
+)
+var popularCatalogHandler = catalogSearchHandler(
+	"popular",
+	"Popular Manga",
+	"followedCount",
+	"desc",
+)
+var updatedCatalogHandler = catalogSearchHandler(
+	"updated",
+	"Recently Updated Manga",
+	"latestUploadedChapter",
+	"desc",
+)

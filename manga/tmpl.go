@@ -4,14 +4,12 @@ import (
 	"context"
 	"embed"
 	"io"
-	"log/slog"
 	"mime"
 	"net/url"
 	"path"
 	"text/template"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/chapter"
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
@@ -23,27 +21,31 @@ var tmpl *template.Template
 func init() {
 	tmpl = template.New("")
 	tmpl = tmpl.Funcs(template.FuncMap{
-		"datef": func(t time.Time) string { return t.Format(time.RFC3339) },
+		"datef": func(t time.Time) string { return t.UTC().Format(time.RFC3339Nano) },
 		"mime":  func(s string) string { return mime.TypeByExtension(path.Ext(s)) },
 	})
 	tmpl = template.Must(tmpl.ParseFS(tmplFS, "templates/*"))
 }
 
 type listData struct {
-	ID        uuid.UUID
+	ID        string
 	Self      string
 	MangaList []Manga
 	Host      string
+	UpdatedAt string
+	Title     string
 }
 
-func MangaListFeed(w io.Writer, mangaList []Manga, selfPath string) error {
+func MangaListFeed(w io.Writer, id string, title string, mangaList []Manga, selfPath string) error {
 	self := shared.GlobalOptions.Host
 	self.Path = selfPath
 	data := listData{
-		ID:        uuid.New(),
+		ID:        id,
 		MangaList: mangaList,
 		Self:      self.String(),
 		Host:      shared.GlobalOptions.Host.String(),
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339Nano),
+		Title:     title,
 	}
 
 	return tmpl.ExecuteTemplate(w, "list.tmpl.xml", data)
@@ -59,12 +61,6 @@ func MangaChapterFeed(ctx context.Context, w io.Writer, m Manga, queryParams url
 	chapters, err := m.Feed(ctx, queryParams)
 	if err != nil {
 		return err
-	}
-
-	if len(chapters) == 0 {
-		panic("fuck")
-	} else {
-		slog.InfoContext(ctx, "got chapters", "count", len(chapters))
 	}
 
 	data := chaptersData{

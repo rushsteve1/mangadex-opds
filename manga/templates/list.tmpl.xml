@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <id>urn:uuid:{{ .ID }}</id>
+    <id>{{ .ID }}</id>
 
-  <link rel="self" href="{{ .Self }}" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-  <link rel="start" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-  <link rel="up" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <title>{{ .Title }}</title>
+    <updated>{{ .UpdatedAt }}</updated>
+    <author>
+        <name>mangadex-opds</name>
+        <uri>https://github.com/rushsteve1/mangadex-opds</uri>
+    </author>
 
-  {{ range .MangaList }}
-  <entry>
+    <link rel="self" href="{{ .Self }}" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="start" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="up" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+    {{ range .MangaList }}
+    <entry>
     <title>{{ .TrTitle }}</title>
-    <id>urn::uuid:{{ .ID }}</id>
-    <summary>{{ html .TrDesc }}</summary>
+    <id>urn:uuid:{{ .ID }}</id>
+    <content type="text">{{ html .TrDesc }}</content>
     <updated>{{ datef .Attributes.UpdatedAt }}</updated>
 
     <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="subsection" href="{{ .URL }}" />
@@ -20,7 +27,7 @@
     <author>
         <name>{{ .Name }}</name>
         {{ if ne .URI nil }}
-        <uri>{{ .URI }}</uri>
+        <uri>{{ html .URI }}</uri>
         {{ end }}
     </author>
     {{ end }}
@@ -28,6 +35,6 @@
     <link href="{{ .CoverURL }}" rel="http://opds-spec.org/image" type="{{ mime .CoverURL }}" />
     <link href="{{printf "%s.256.jpg" .CoverURL }}" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail" />
     {{end}}
-  </entry>
-  {{ end }}
+    </entry>
+    {{ end }}
 </feed>

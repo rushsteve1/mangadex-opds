@@ -3,18 +3,19 @@
     <id>urn:uuid:{{ .Manga.ID }}</id>
 
     <title>{{ .Manga.TrTitle }}</title>
-    <summary>{{ html .Manga.TrDesc }}</summary>
-    <updated>{{ datef .Manga.Attributes.UpdatedAt }}</updated>
+    <updated>{{ .Manga.Attributes.UpdatedAt | datef }}</updated>
 
     <link rel="self" href="{{ .Manga.URL }}" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
-    <link rel="start" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-    <link rel="up" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="start" href="{{ .Host }}/catalog" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="up" href="{{ .Host }}/catalog" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+    <content type="text">{{ html .Manga.TrDesc }}</content>
 
     {{ with .Manga.GetRelData }}
     {{ range .Authors }}
     <author>
         <name>{{ .Name }}</name>
-        {{ if ne .URI nil }}
+        {{ if ne .URI "" }}
         <uri>{{ .URI }}</uri>
         {{ end }}
     </author>
@@ -27,7 +28,10 @@
     {{ range .Chapters }}
     <entry>
         <title>{{ .FullTitle }}</title>
+        <id>urn:uuid:{{ .ID }}</id>
         <updated>{{ datef .Attributes.UpdatedAt }}</updated>
+        <content type="text">{{ .FullTitle }}</content>
+
         <link href="{{ .URL }}/epub" type="{{ mime ".epub" }}" rel="http://opds-spec.org/acquisition" />
         <link href="{{ .URL }}/cbz" type="{{ mime ".cbz" }}" rel="http://opds-spec.org/acquisition" />
         <link href="/chapter/{{ .ID }}?page={pageNumber}" type="image/png" rel="http://vaemendis.net/opds-pse/stream" pse:count="{{ .Attributes.Pages }}" />

@@ -30,7 +30,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = manga.MangaListFeed(w, resp, r.URL.Path)
+	err = manga.MangaListFeed(w, "search", "Search Manga", resp, r.URL.Path)
 	if err != nil {
 		die(w, r, err)
 	}

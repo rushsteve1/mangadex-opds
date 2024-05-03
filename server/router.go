@@ -2,32 +2,31 @@ package server
 
 import (
 	"log/slog"
-	"mime"
 	"net/http"
 )
 
 func Router() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	ih := AcceptMiddleware(indexHandler, mime.TypeByExtension(".html"))
-	mux.HandleFunc("/", ih)
+	mux.HandleFunc("/", indexHandler)
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.Write(favicon)
+	})
+	mux.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		w.Write(robotstxt)
+	})
 
-	mux.HandleFunc("/root", AcceptXML(rootHandler))
+	mux.HandleFunc("/catalog", rootHandler)
+	mux.HandleFunc("/catalog/new", newCatalogHandler)
+	mux.HandleFunc("/catalog/popular", popularCatalogHandler)
+	mux.HandleFunc("/catalog/updated", updatedCatalogHandler)
 
-	mux.HandleFunc("/search", AcceptXML(searchHandler))
+	mux.HandleFunc("/search", searchHandler)
 
-	mux.HandleFunc("/catalogs/new", AcceptXML(newCatalogHandler))
-	mux.HandleFunc("/catalogs/popular", AcceptXML(popularCatalogHandler))
-	mux.HandleFunc("/catalogs/updated", AcceptXML(updatedCatalogHandler))
+	mux.HandleFunc("/manga/{id}", mangaHandler)
 
-	mux.HandleFunc("/manga/{id}", AcceptXML(mangaHandler))
-
-	eh := AcceptMiddleware(epubHandler, mime.TypeByExtension(".epub"))
-	mux.HandleFunc("/chapter/{id}/epub", eh)
-
-	// TODO I don't think this mimetype is quite right, add more
-	ch := AcceptMiddleware(cbzHandler, mime.TypeByExtension(".cbz"))
-	mux.HandleFunc("/chapter/{id}/cbz", ch)
+	mux.HandleFunc("/chapter/{id}/epub", epubHandler)
+	mux.HandleFunc("/chapter/{id}/cbz", cbzHandler)
 
 	outerMux := http.NewServeMux()
 	outerMux.HandleFunc("/", SlogMiddleware(mux.ServeHTTP))

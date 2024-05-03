@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log/slog"
 	"mime"
 	"net/http"
@@ -38,35 +37,4 @@ func HtmlXmlSplitterMiddleware(htmlNext http.HandlerFunc, xmlNext http.HandlerFu
 
 		http.Error(w, "invalid accepts header", http.StatusNotAcceptable)
 	}
-}
-
-func AcceptMiddleware(next http.HandlerFunc, mtypes ...string) http.HandlerFunc {
-	for i, m := range mtypes {
-		mtypes[i] = strings.Split(m, ";")[0]
-	}
-
-	return func(w http.ResponseWriter, r *http.Request) {
-		accepts := r.Header.Get("Accept")
-		if containsAny(accepts, mtypes...) {
-			next(w, r)
-			return
-		}
-
-		resp := fmt.Sprintf("accept header must contain one of %v", mtypes)
-		http.Error(w, resp, http.StatusNotAcceptable)
-	}
-}
-
-func AcceptXML(next http.HandlerFunc) http.HandlerFunc {
-	return AcceptMiddleware(next, mime.TypeByExtension(".xml"))
-}
-
-func containsAny(s string, ss ...string) bool {
-	for _, str := range ss {
-		if strings.Contains(s, str) {
-			return true
-		}
-	}
-
-	return false
 }

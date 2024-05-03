@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"cmp"
 	"encoding/json"
 	"log/slog"
 	"net/url"
@@ -12,7 +11,7 @@ var GlobalOptions Options
 
 type Options struct {
 	Bind      string
-	Host      *url.URL
+	Host      url.URL
 	Language  string
 	Query     url.Values
 	DataSaver bool
@@ -31,10 +30,13 @@ func ReadOptionsFromEnv() Options {
 	if err != nil {
 		slog.Error("error reading host variable", "error", err)
 	}
+	if u == nil {
+		u = &defaultHost
+	}
 
 	return Options{
 		Bind:      env("ADDRESS", defaultHost.Host),
-		Host:      cmp.Or(u, &defaultHost),
+		Host:      *u,
 		Language:  env("LANGUAGE", "en"),
 		Query:     env("QUERY", url.Values{}),
 		DataSaver: env("DATA_SAVER", false),
@@ -46,7 +48,7 @@ func ReadOptionsFromEnv() Options {
 func TestOptions() Options {
 	return Options{
 		Bind:      defaultHost.Host,
-		Host:      &defaultHost,
+		Host:      defaultHost,
 		Language:  "en",
 		DataSaver: true,
 		DevApi:    true,

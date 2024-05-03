@@ -13,6 +13,11 @@ import (
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
+func init() {
+	// I think this will help get around an issue with the mime types
+	mime.AddExtensionType(".cbz", "application/zip")
+}
+
 func chapterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("page") {
 		imageHandler(w, r)
