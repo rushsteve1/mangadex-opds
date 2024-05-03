@@ -25,6 +25,12 @@ type MangaAttributes struct {
 	UpdatedAt        time.Time         `json:"updatedAt"`
 }
 
+func (m Manga) URL() string {
+	u := shared.GlobalOptions.Host
+	u.Path, _ = url.JoinPath("manga", m.ID.String())
+	return u.String()
+}
+
 func (m Manga) TrTitle() string {
 	return shared.Tr(m.Attributes.Title)
 }
@@ -35,21 +41,30 @@ func (m Manga) TrDesc() string {
 
 type RelData struct {
 	Authors  []Author
-	CoverURL *url.URL
+	CoverURL string
 }
 
 type Author struct {
 	Name string
-	URI  *url.URL
+	URI  string
 }
 
-func ParseAuthor(m map[string]any) Author {
-	u := cmp.Or(m["website"], m["twitter"], m["youtube"], m["tumblr"], m["pixiv"])
-	uri, _ := url.Parse(u.(string))
-	return Author{
-		Name: m["name"].(string),
-		URI:  uri,
+func ParseAuthor(m map[string]any) (a Author) {
+	ustr := cmp.Or(m["website"], m["twitter"], m["youtube"], m["tumblr"], m["pixiv"])
+	s, ok := ustr.(string)
+	if ok {
+		u, _ := url.Parse(s)
+		a.URI = u.String()
 	}
+
+	s, ok = m["name"].(string)
+	if ok {
+		a.Name = s
+	} else {
+		a.Name = "Unknown Author"
+	}
+
+	return a
 }
 
 func (m Manga) GetRelData() (rd RelData) {
@@ -58,11 +73,15 @@ func (m Manga) GetRelData() (rd RelData) {
 		case "author":
 			fallthrough
 		case "artist":
+			// TODO dedup same author/artist
 			rd.Authors = append(rd.Authors, ParseAuthor(rel.Attributes))
 		case "cover_art":
 			u := shared.UploadsURL
-			u.Path, _ = url.JoinPath("covers", m.ID.String(), rel.Attributes["fileName"].(string))
-			rd.CoverURL = &u
+			fn, ok := rel.Attributes["fileName"].(string)
+			if ok {
+				u.Path, _ = url.JoinPath("covers", m.ID.String(), fn)
+				rd.CoverURL = u.String()
+			}
 		}
 	}
 	return rd

@@ -1,16 +1,18 @@
 package chapter
 
 import (
+	"net/url"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
 type Chapter struct {
-	ID         uuid.UUID       `json:"id"`
-	Attributes ChapterAttributes `json:"attributes"`
-	// Relationships []shared.Relationship `json:"relationships"`
+	ID            uuid.UUID             `json:"id"`
+	Attributes    ChapterAttributes     `json:"attributes"`
+	Relationships []shared.Relationship `json:"relationships"`
 }
 
 type ChapterAttributes struct {
@@ -21,6 +23,12 @@ type ChapterAttributes struct {
 	TranslatedLanguage string    `json:"translatedLanguage"`
 	CreatedAt          time.Time `json:"createdAt"`
 	UpdatedAt          time.Time `json:"updatedAt"`
+}
+
+func (c Chapter) URL() string {
+	u := shared.GlobalOptions.Host
+	u.Path, _ = url.JoinPath("chapter", c.ID.String())
+	return u.String()
 }
 
 func (c Chapter) FullTitle() string {

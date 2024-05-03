@@ -51,6 +51,10 @@ func (c Chapter) WriteEpub(ctx context.Context, w io.Writer) (err error) {
 	return err
 }
 
+// TODO this
+// - Epub metadata
+// - Epub structure
+// - ComicInfo.xml
 func (c Chapter) writeMetadata(z *zip.Writer) (err error) {
 	w, err := z.Create("META-INF/container.xml")
 	if err != nil {

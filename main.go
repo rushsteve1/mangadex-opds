@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -12,13 +11,10 @@ import (
 
 func main() {
 	var err error
-	shared.GlobalOptions, err = shared.ReadOptionsFromEnv()
-	if err != nil {
-		slog.Error("error parsing options", "error", err.Error())
-	}
+	shared.GlobalOptions = shared.ReadOptionsFromEnv()
 
 	srv := http.Server{
-		Addr:              fmt.Sprintf(":%d", 4444),
+		Addr:              shared.GlobalOptions.Bind,
 		ReadHeaderTimeout: time.Second * 5,
 		Handler:           server.Router(),
 	}

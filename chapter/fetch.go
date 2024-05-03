@@ -1,6 +1,7 @@
 package chapter
 
 import (
+	"cmp"
 	"context"
 	"log/slog"
 	"net/url"
@@ -26,7 +27,8 @@ func Fetch(ctx context.Context, id uuid.UUID, queryParams url.Values) (c Chapter
 	// https://api.mangadex.org/docs/01-concepts/reference-expansion/
 	// TODO optimize these
 	defaultParams := url.Values{
-		"includes[]": []string{"scanlation_group", "manga"},
+		"includes[]":           []string{"scanlation_group" /*"manga"*/},
+		"translatedLanguage[]": []string{cmp.Or(shared.GlobalOptions.Language, "en")},
 	}
 
 	for k, v := range defaultParams {

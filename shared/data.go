@@ -11,5 +11,5 @@ type Data[T any] struct {
 
 func Tr(m map[string]string) string {
 	lang := cmp.Or(GlobalOptions.Language, "en")
-	return cmp.Or(m[lang], m["en"])
+	return cmp.Or(m[lang], m["en"], m["en-ro"], "Unknown")
 }

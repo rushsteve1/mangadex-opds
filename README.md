@@ -21,3 +21,11 @@ We want to be respectful of MangaDex and their
 
 - **NOT** a standalone manga reading server
 - **NOT** a publicly available service
+
+## Specifications
+
+- [OPDS 1.2](https://specs.opds.io/opds-1.2)
+- [ATOM](https://validator.w3.org/feed/docs/atom.html)
+- [OPDS-PSE 1.0](https://github.com/anansi-project/opds-pse/blob/master/v1.0.md)
+- [EPUB](https://www.w3.org/TR/epub-33/)
+- [ComicInfo.xml](https://github.com/anansi-project/comicinfo/blob/main/DOCUMENTATION.md)

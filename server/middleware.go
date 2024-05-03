@@ -41,6 +41,10 @@ func HtmlXmlSplitterMiddleware(htmlNext http.HandlerFunc, xmlNext http.HandlerFu
 }
 
 func AcceptMiddleware(next http.HandlerFunc, mtypes ...string) http.HandlerFunc {
+	for i, m := range mtypes {
+		mtypes[i] = strings.Split(m, ";")[0]
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		accepts := r.Header.Get("Accept")
 		if containsAny(accepts, mtypes...) {

@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"
-  xmlns:dc="http://purl.org/dc/terms/"
-  xmlns:opds="http://opds-spec.org/2010/catalog">
+<feed xmlns="http://www.w3.org/2005/Atom">
   <id>urn:uuid:{{ .ID }}</id>
 
-  <link rel="self" href="{{ .SelfPath }}" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
-  <link rel="start" href="/catalogs/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-  <link rel="up" href="/catalogs/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="self" href="{{ .Self }}" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="start" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="up" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
 
   {{ range .MangaList }}
   <entry>
     <title>{{ .TrTitle }}</title>
-    <id>urn::uuid{{ .ID }}</id>
-    <summary>{{ .TrDesc }}</summary>
+    <id>urn::uuid:{{ .ID }}</id>
+    <summary>{{ html .TrDesc }}</summary>
     <updated>{{ datef .Attributes.UpdatedAt }}</updated>
+
+    <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="subsection" href="{{ .URL }}" />
 
     {{ with .GetRelData }}
     {{ range .Authors }}
     <author>
         <name>{{ .Name }}</name>
+        {{ if ne .URI nil }}
         <uri>{{ .URI }}</uri>
+        {{ end }}
     </author>
     {{ end }}
 
-    <link rel="http://opds-spec.org/image" href="{{ .CoverURL }}" type="image/png"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="{{printf "%s.256.jpg" .CoverURL }}" type="image/gif"/>
+    <link href="{{ .CoverURL }}" rel="http://opds-spec.org/image" type="{{ mime .CoverURL }}" />
+    <link href="{{printf "%s.256.jpg" .CoverURL }}" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail" />
     {{end}}
   </entry>
   {{ end }}

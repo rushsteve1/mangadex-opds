@@ -2,9 +2,9 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>urn:uuid:{{ .ID }}</id>
 
-    <link rel="self" href="/catalogs/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-    <link rel="start" href="/catalogs/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-    <link rel="search" href="/search" type="application/opensearchdescription+xml"/>
+    <link rel="self" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="start" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="search" href="{{ .Host }}/search" type="application/opensearchdescription+xml"/>
 
     <title>OPDS Catalog Root Example</title>
     <updated>{{ .UpdatedAt }}</updated>
@@ -15,21 +15,21 @@
 
     <entry>
         <title>Popular Manga</title>
-        <link rel="http://opds-spec.org/sort/popular" href="/catalogs/popular" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+        <link rel="http://opds-spec.org/sort/popular" href="{{ .Host }}/catalogs/popular" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
         <updated>{{ .UpdatedAt }}</updated>
         <id>urn:uuid:{{ .ID }}</id>
         <content type="text">Popular manga from MangaDex.</content>
     </entry>
     <entry>
         <title>New Manga</title>
-        <link rel="http://opds-spec.org/sort/new" href="/catalogs/new" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+        <link rel="http://opds-spec.org/sort/new" href="{{ .Host }}/catalogs/new" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
         <updated>{{ .UpdatedAt }}</updated>
         <id>urn:uuid:{{ .ID }}</id>
         <content type="text">Newly added manga on MangaDex.</content>
     </entry>
     <entry>
         <title>Recently Updated Manga</title>
-        <link rel="subsection" href="/catalogs/updated" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+        <link rel="subsection" href="{{ .Host }}/catalogs/updated" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
         <updated>{{ .UpdatedAt }}</updated>
         <id>urn:uuid:{{ .ID }}</id>
         <content type="text">Recently updated manga on MangaDex.</content>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:pse="http://vaemendis.net/opds-pse/ns">
+    <id>urn:uuid:{{ .Manga.ID }}</id>
+
+    <title>{{ .Manga.TrTitle }}</title>
+    <summary>{{ html .Manga.TrDesc }}</summary>
+    <updated>{{ datef .Manga.Attributes.UpdatedAt }}</updated>
+
+    <link rel="self" href="{{ .Manga.URL }}" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <link rel="start" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="up" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+    {{ with .Manga.GetRelData }}
+    {{ range .Authors }}
+    <author>
+        <name>{{ .Name }}</name>
+        {{ if ne .URI nil }}
+        <uri>{{ .URI }}</uri>
+        {{ end }}
+    </author>
+    {{ end }}
+
+    <link rel="http://opds-spec.org/image" href="{{ .CoverURL }}" type="{{ mime .CoverURL }}"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="{{printf "%s.256.jpg" .CoverURL }}" type="image/jpeg"/>
+    {{ end }}
+
+    {{ range .Chapters }}
+    <entry>
+        <title>{{ .FullTitle }}</title>
+        <updated>{{ datef .Attributes.UpdatedAt }}</updated>
+        <link href="{{ .URL }}/epub" type="{{ mime ".epub" }}" rel="http://opds-spec.org/acquisition" />
+        <link href="{{ .URL }}/cbz" type="{{ mime ".cbz" }}" rel="http://opds-spec.org/acquisition" />
+        <link href="/chapter/{{ .ID }}?page={pageNumber}" type="image/png" rel="http://vaemendis.net/opds-pse/stream" pse:count="{{ .Attributes.Pages }}" />
+    </entry>
+    {{ end }}
+</feed>
