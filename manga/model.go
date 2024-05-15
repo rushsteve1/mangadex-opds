@@ -16,19 +16,31 @@ type Manga struct {
 }
 
 type MangaAttributes struct {
-	Title            map[string]string `json:"title"`
-	Description      map[string]string `json:"description"`
-	OriginalLanguage string            `json:"originalLanguage"`
-	Status           string            `json:"status"`
-	Demographic      string            `json:"publicationDemographic"`
-	CreatedAt        time.Time         `json:"createdAt"`
-	UpdatedAt        time.Time         `json:"updatedAt"`
+	Title            map[string]string   `json:"title"`
+	AltTitles        []map[string]string `json:"altTitles"`
+	Description      map[string]string   `json:"description"`
+	OriginalLanguage string              `json:"originalLanguage"`
+	Status           string              `json:"status"`
+	Demographic      string              `json:"publicationDemographic"`
+	CreatedAt        time.Time           `json:"createdAt"`
+	UpdatedAt        time.Time           `json:"updatedAt"`
 }
 
 func (m Manga) URL() string {
 	u := shared.GlobalOptions.Host
 	u.Path, _ = url.JoinPath("manga", m.ID.String())
 	return u.String()
+}
+
+func (m Manga) MergeTitles() {
+	for _, at := range m.Attributes.AltTitles {
+		for k, v := range at {
+			_, found := m.Attributes.Title[k]
+			if !found {
+				m.Attributes.Title[k] = v
+			}
+		}
+	}
 }
 
 func (m Manga) TrTitle() string {

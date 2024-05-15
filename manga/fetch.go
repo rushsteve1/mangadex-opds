@@ -22,7 +22,10 @@ func Fetch(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Manga, 
 
 	data, err := shared.QueryAPI[shared.Data[Manga]](ctx, queryPath, queryParams)
 
-	return data.Data, err
+	m = data.Data
+	m.MergeTitles()
+
+	return m, err
 }
 
 func Search(ctx context.Context, queryParams url.Values) (ms []Manga, err error) {
