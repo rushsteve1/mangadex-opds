@@ -37,6 +37,8 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func mangaHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", mime.TypeByExtension(".xml"))
+
 	id, err := uuid.Parse(r.PathValue("id"))
 	if err != nil {
 		http.Error(w, "invalid uuid", http.StatusBadRequest)

@@ -2,20 +2,25 @@ package server
 
 import (
 	"fmt"
+	"mime"
 	"net/http"
 
 	"github.com/rushsteve1/mangadex-opds/manga"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", mime.TypeByExtension(".xml"))
+
 	err := rootTemplate(w)
 	if err != nil {
 		httpError(w, r, err)
 	}
 }
 
-func catalogSearchHandler(id string, title string, term string, order string) http.HandlerFunc {
+func makeCatalogHandler(id string, title string, term string, order string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", mime.TypeByExtension(".xml"))
+
 		params := r.URL.Query()
 		params.Add(fmt.Sprintf("order[%s]", term), order)
 
@@ -32,19 +37,19 @@ func catalogSearchHandler(id string, title string, term string, order string) ht
 	}
 }
 
-var newCatalogHandler = catalogSearchHandler(
+var newCatalogHandler = makeCatalogHandler(
 	"new",
 	"New Manga",
 	"createdAt",
 	"desc",
 )
-var popularCatalogHandler = catalogSearchHandler(
+var popularCatalogHandler = makeCatalogHandler(
 	"popular",
 	"Popular Manga",
 	"followedCount",
 	"desc",
 )
-var updatedCatalogHandler = catalogSearchHandler(
+var updatedCatalogHandler = makeCatalogHandler(
 	"updated",
 	"Recently Updated Manga",
 	"latestUploadedChapter",
