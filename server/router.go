@@ -41,7 +41,7 @@ func Router() *http.ServeMux {
 
 	mux.HandleFunc("/manga/{id}", mangaHandler)
 
-	mux.HandleFunc("/chapter/{id}", cbzHandler)
+	mux.HandleFunc("/chapter/{id}", chapterHandler)
 	mux.HandleFunc("/chapter/{id}/cbz", cbzHandler)
 	mux.HandleFunc("/chapter/{id}/epub", epubHandler)
 
@@ -54,7 +54,14 @@ func Router() *http.ServeMux {
 	}
 
 	outerMux := http.NewServeMux()
-	outerMux.HandleFunc("/", SlogMiddleware(mux.ServeHTTP))
+	innerMux := SlogMiddleware(mux.ServeHTTP)
+
+	// This is on by default but can be turned off
+	if shared.GlobalOptions.GzipResponses {
+		innerMux = GzipMiddleware(innerMux)
+	}
+
+	outerMux.HandleFunc("/", innerMux)
 
 	return outerMux
 }

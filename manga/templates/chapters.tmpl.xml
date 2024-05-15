@@ -3,7 +3,7 @@
     xmlns:dc="http://purl.org/dc/terms/"
     xmlns:opds="http://opds-spec.org/2010/catalog"
     xmlns:pse="http://vaemendis.net/opds-pse/ns">
-    <id>urn:uuid:{{ .Manga.ID }}</id>
+    <id>{{ .Manga.ID }}</id>
 
     <title>{{ html .Manga.TrTitle }}</title>
     <updated>{{ .Manga.Attributes.UpdatedAt | datef }}</updated>
@@ -16,6 +16,7 @@
     <link rel="self" href="{{ .Manga.URL }}" type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
     <link rel="start" href="{{ .Host }}/catalog" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
     <link rel="up" href="{{ .Host }}/catalog" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="search" href="{{ .Host }}/search" type="application/opensearchdescription+xml"/>
 
     {{/*
     <content type="text">{{ html .Manga.TrDesc }}</content>
@@ -26,7 +27,7 @@
     {{ range .Chapters }}
     <entry>
         <title>{{ html .FullTitle }}</title>
-        <id>urn:uuid:{{ .ID }}</id>
+        <id>{{ .ID }}</id>
         <updated>{{ datef .Attributes.UpdatedAt }}</updated>
         <content type="text">{{ html .FullTitle }}</content>
 
@@ -44,8 +45,7 @@
         <link href="{{ .URL }}/epub" type="{{ mime ".epub" }}" rel="http://opds-spec.org/acquisition" />
         */}}
         <link href="{{ .URL }}/cbz" type="{{ mime ".cbz" }}" rel="http://opds-spec.org/acquisition" />
-        {{/*        <link href="/chapter/{{ .ID }}?page={pageNumber}" type="image/png" rel="http://vaemendis.net/opds-pse/stream" pse:count="{{ .Attributes.Pages }}" />
- */}}
+        <link href="{{ .URL }}?page={pageNumber}" type="image/png" rel="http://vaemendis.net/opds-pse/stream" pse:count="{{ .Attributes.Pages }}" />
 
         <link href="{{ $reldata.CoverURL }}" rel="http://opds-spec.org/image" type="{{ mime $reldata.CoverURL }}" />
         <link href="{{printf "%s.256.jpg" $reldata.CoverURL }}" rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" />

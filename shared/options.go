@@ -11,14 +11,16 @@ import (
 var GlobalOptions Options
 
 type Options struct {
-	Bind      string
-	Host      url.URL
-	Language  string
-	Query     url.Values
-	DataSaver bool
-	MDUploads bool
-	DevApi    bool
-	ExpVars   bool
+	Bind          string
+	Host          url.URL
+	Language      string
+	Query         url.Values
+	DataSaver     bool
+	MDUploads     bool
+	DevApi        bool
+	ExpVars       bool
+	GzipResponses bool
+	LogLevel      slog.Level
 }
 
 var defaultHost = url.URL{
@@ -37,14 +39,16 @@ func ReadOptionsFromEnv() Options {
 	}
 
 	return Options{
-		Bind:      env("ADDRESS", defaultHost.Host),
-		Host:      *u,
-		Language:  env("LANGUAGE", "en"),
-		Query:     env("QUERY", url.Values{}),
-		DataSaver: env("DATA_SAVER", false),
-		MDUploads: env("MD_UPLOADS", false),
-		DevApi:    env("DEV_API", false),
-		ExpVars:   env("EXP_VARS", true),
+		Bind:          env("ADDRESS", defaultHost.Host),
+		Host:          *u,
+		Language:      env("LANGUAGE", "en"),
+		Query:         env("QUERY", url.Values{}),
+		DataSaver:     env("DATA_SAVER", false),
+		MDUploads:     env("MD_UPLOADS", false),
+		DevApi:        env("DEV_API", false),
+		ExpVars:       env("EXP_VARS", true),
+		GzipResponses: env("GZIP_RESPONSES", true),
+		LogLevel:      env("LOG_LEVEL", slog.LevelInfo),
 	}
 }
 
@@ -56,6 +60,7 @@ func TestOptions() Options {
 		DataSaver: true,
 		DevApi:    true,
 		ExpVars:   true,
+		LogLevel:  slog.LevelDebug,
 	}
 }
 

@@ -14,24 +14,24 @@
     <link rel="search" href="{{ .Host }}/search" type="application/opensearchdescription+xml"/>
 
     <entry>
-        <title>Popular Manga</title>
+        <title>Most Followed</title>
         <link rel="subsection" href="{{ .Host }}/catalog/popular" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
         <updated>{{ .UpdatedAt }}</updated>
         <id>popular</id>
-        <content type="text">Popular manga from MangaDex.</content>
+        <content type="text">Most Followed manga on MangaDex.</content>
     </entry>
     <entry>
-        <title>New Manga</title>
+        <title>New Arrivals</title>
         <link rel="subsection" href="{{ .Host }}/catalog/new" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
         <updated>{{ .UpdatedAt }}</updated>
         <id>new</id>
-        <content type="text">Newly added manga on MangaDex.</content>
+        <content type="text">Newly Arrived manga on MangaDex.</content>
     </entry>
     <entry>
-        <title>Recently Updated Manga</title>
+        <title>New Chapters</title>
         <link rel="subsection" href="{{ .Host }}/catalog/updated" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
         <updated>{{ .UpdatedAt }}</updated>
         <id>updated</id>
-        <content type="text">Recently updated manga on MangaDex.</content>
+        <content type="text">Manga with New Chapters on MangaDex.</content>
     </entry>
 </feed>

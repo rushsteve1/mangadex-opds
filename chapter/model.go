@@ -1,6 +1,7 @@
 package chapter
 
 import (
+	"cmp"
 	"net/url"
 	"strings"
 	"time"
@@ -36,16 +37,14 @@ func (c Chapter) FullTitle() string {
 
 	// TODO manga title
 
-	if c.Attributes.Chapter != "" {
-		builder.WriteString("Chapter ")
-		builder.WriteString(c.Attributes.Chapter)
-	}
-
 	if c.Attributes.Volume != "" {
-		builder.WriteString(" [Vol. ")
+		builder.WriteString("[Vol. ")
 		builder.WriteString(c.Attributes.Volume)
 		builder.WriteString("]")
 	}
+
+	builder.WriteString(" Chapter ")
+	builder.WriteString(cmp.Or(c.Attributes.Chapter, "Unknown"))
 
 	if c.Attributes.Title != "" {
 		if c.Attributes.Chapter != "" || c.Attributes.Volume != "" {

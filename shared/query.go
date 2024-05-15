@@ -102,6 +102,8 @@ func QueryImage(ctx context.Context, imgUrl *url.URL, w io.Writer) (err error) {
 
 	_, err = io.Copy(w, res.Body)
 
+	slog.DebugContext(ctx, "finished image download", "url", imgUrl)
+
 	return err
 }
 

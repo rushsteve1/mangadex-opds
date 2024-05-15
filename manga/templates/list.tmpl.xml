@@ -12,11 +12,12 @@
     <link rel="self" href="{{ .Self }}" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
     <link rel="start" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
     <link rel="up" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="search" href="{{ .Host }}/search" type="application/opensearchdescription+xml"/>
 
     {{ range .MangaList }}
     <entry>
         <title>{{ .TrTitle }}</title>
-        <id>urn:uuid:{{ .ID }}</id>
+        <id>{{ .ID }}</id>
         <content type="text">{{ html .TrDesc }}</content>
         <updated>{{ datef .Attributes.UpdatedAt }}</updated>
 

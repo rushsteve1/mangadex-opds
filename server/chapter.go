@@ -2,11 +2,10 @@ package server
 
 import (
 	"fmt"
-	"io"
+	"log/slog"
 	"mime"
 	"net/http"
 	"net/url"
-	"path"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -26,7 +25,7 @@ func chapterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u := r.URL
-	u.Path, _ = url.JoinPath(r.URL.Path, "epub")
+	u.Path, _ = url.JoinPath(r.URL.Path, "cbz")
 
 	http.Redirect(w, r, u.String(), http.StatusSeeOther)
 }
@@ -74,12 +73,10 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	imgURL := imgURLs[page]
-	w.Header().Add("Content-Type", mime.TypeByExtension(path.Ext(imgURL.Path)))
 
-	err = shared.QueryImage(r.Context(), imgURL, w)
-	if err != nil {
-		httpError(w, r, err)
-	}
+	slog.InfoContext(r.Context(), "redirecting", "to url", imgURL)
+
+	http.Redirect(w, r, imgURL.String(), http.StatusMovedPermanently)
 }
 
 func epubHandler(w http.ResponseWriter, r *http.Request) {
@@ -135,21 +132,7 @@ func coversHandler(w http.ResponseWriter, r *http.Request) {
 	coverUrl := shared.UploadsURL
 	coverUrl.Path = r.URL.Path
 
-	resp, err := http.Get(coverUrl.String())
-	if err != nil {
-		httpError(w, r, err)
-		return
-	}
-	defer resp.Body.Close()
+	slog.InfoContext(r.Context(), "redirecting", "to url", coverUrl.String())
 
-	if resp.StatusCode != http.StatusOK {
-		httpError(w, r, fmt.Errorf("upstream error: %s", resp.Status))
-		return
-	}
-
-	_, err = io.Copy(w, resp.Body)
-	if err != nil {
-		httpError(w, r, err)
-		return
-	}
+	http.Redirect(w, r, coverUrl.String(), http.StatusMovedPermanently)
 }
