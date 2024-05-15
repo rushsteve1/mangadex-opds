@@ -21,7 +21,12 @@ func main() {
 		Handler:           server.Router(),
 	}
 
-	slog.Info("starting server", "addr", srv.Addr, "log level", shared.GlobalOptions.LogLevel.String())
+	slog.Info(
+		"starting server",
+		"addr", srv.Addr,
+		"host", shared.GlobalOptions.Host.String(),
+		"log level", shared.GlobalOptions.LogLevel.String(),
+	)
 
 	err := srv.ListenAndServe()
 	slog.Error(err.Error())

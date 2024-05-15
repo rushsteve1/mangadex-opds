@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
 // Bocchi's Guide to MangaDex
@@ -23,6 +24,8 @@ func Test_Fetch(t *testing.T) {
 }
 
 func Test_Feed(t *testing.T) {
+	shared.GlobalOptions = shared.TestOptions()
+
 	ctx := context.Background()
 	m := Manga{ID: uuid.MustParse(MangaID)}
 

@@ -39,6 +39,10 @@ func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []chapter.C
 		return nil, err
 	}
 
+	if queryParams == nil {
+		queryParams = url.Values{}
+	}
+
 	queryParams.Set("order[chapter]", "asc")
 	queryParams.Set("translatedLanguage[]", shared.GlobalOptions.Language)
 	queryParams.Set("includeEmptyPages", "0")
