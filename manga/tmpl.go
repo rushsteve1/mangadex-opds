@@ -34,6 +34,7 @@ type listData struct {
 	Host      string
 	UpdatedAt string
 	Title     string
+	Version   string
 }
 
 func MangaListFeed(w io.Writer, id string, title string, mangaList []Manga, selfPath string) error {
@@ -46,6 +47,7 @@ func MangaListFeed(w io.Writer, id string, title string, mangaList []Manga, self
 		Host:      shared.GlobalOptions.Host.String(),
 		UpdatedAt: time.Now().UTC().Format(time.RFC3339Nano),
 		Title:     title,
+		Version:   shared.Version(),
 	}
 
 	return tmpl.ExecuteTemplate(w, "list.tmpl.xml", data)
@@ -55,6 +57,7 @@ type chaptersData struct {
 	Manga    Manga
 	Chapters []chapter.Chapter
 	Host     string
+	Version  string
 }
 
 func MangaChapterFeed(ctx context.Context, w io.Writer, m Manga, queryParams url.Values) error {
@@ -67,6 +70,7 @@ func MangaChapterFeed(ctx context.Context, w io.Writer, m Manga, queryParams url
 		Manga:    m,
 		Chapters: chapters,
 		Host:     shared.GlobalOptions.Host.String(),
+		Version:  shared.Version(),
 	}
 
 	return tmpl.ExecuteTemplate(w, "chapters.tmpl.xml", data)

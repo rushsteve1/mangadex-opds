@@ -5,7 +5,7 @@
     <title>MangaDex OPDS Catalog</title>
     <updated>{{ .UpdatedAt }}</updated>
     <author>
-        <name>mangadex-opds</name>
+        <name>mangadex-opds {{ .Version }}</name>
         <uri>https://github.com/rushsteve1/mangadex-opds</uri>
     </author>
 

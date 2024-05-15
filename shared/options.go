@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
+	"runtime/debug"
 	"strings"
 )
 
@@ -23,23 +24,28 @@ type Options struct {
 	LogLevel      slog.Level
 }
 
-var defaultHost = url.URL{
+var defaultBind = url.URL{
 	Scheme: "http",
-	Host:   "localhost:4444",
+	Host:   "0.0.0.0:4444",
 }
 
 func ReadOptionsFromEnv() Options {
 	h := env("HOST", "http://localhost:4444")
 	u, err := url.Parse(h)
 	if err != nil {
-		slog.Error("error reading host variable", "error", err)
+		slog.Error("error reading HOST variable, using fallback", "error", err, "fallback", defaultBind.String())
 	}
 	if u == nil {
-		u = &defaultHost
+		u = &defaultBind
+	}
+
+	if u.Scheme == "" {
+		slog.Warn("no scheme on HOST, assuming https")
+		u.Scheme = "https"
 	}
 
 	return Options{
-		Bind:          env("ADDRESS", defaultHost.Host),
+		Bind:          env("BIND", defaultBind.Host),
 		Host:          *u,
 		Language:      env("LANGUAGE", "en"),
 		Query:         env("QUERY", url.Values{}),
@@ -54,8 +60,8 @@ func ReadOptionsFromEnv() Options {
 
 func TestOptions() Options {
 	return Options{
-		Bind:      defaultHost.Host,
-		Host:      defaultHost,
+		Bind:      defaultBind.Host,
+		Host:      defaultBind,
 		Language:  "en",
 		DataSaver: true,
 		DevApi:    true,
@@ -103,4 +109,9 @@ func LoadDotEnv() {
 
 		os.Setenv(strings.TrimSpace(key), strings.TrimSpace(val))
 	}
+}
+
+func Version() string {
+	info, _ := debug.ReadBuildInfo()
+	return info.Main.Version
 }

@@ -8,8 +8,7 @@
     <title>{{ html .Manga.TrTitle }}</title>
     <updated>{{ .Manga.Attributes.UpdatedAt | datef }}</updated>
     <author>
-        {{/* TODO add version */}}
-        <name>mangadex-opds</name>
+        <name>mangadex-opds {{ .Version }}</name>
         <uri>https://github.com/rushsteve1/mangadex-opds</uri>
     </author>
 
