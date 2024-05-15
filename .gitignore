@@ -7,3 +7,4 @@ tmp/
 .env
 
 __debug*
+mangadex-opds
