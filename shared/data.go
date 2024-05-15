@@ -10,6 +10,6 @@ type Data[T any] struct {
 }
 
 func Tr(m map[string]string) string {
-	lang := cmp.Or(GlobalOptions.Language, "en")
-	return cmp.Or(m[lang], m["en"], m["en-ro"], "Unknown")
+	// ja-ro is a special locale that MangaDex uses which should always exist
+	return cmp.Or(m[GlobalOptions.Language], m["ja-ro"], "Unknown")
 }

@@ -15,7 +15,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()) == 0 {
 		data, err := tmplFS.ReadFile("templates/opensearch.xml")
 		if err != nil {
-			die(w, r, err)
+			httpError(w, r, err)
 			return
 		}
 
@@ -26,13 +26,13 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	// Otherwise return the OPDS XML list for the search
 	resp, err := manga.Search(r.Context(), r.URL.Query())
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
 	err = manga.MangaListFeed(w, "search", "Search Manga", resp, r.URL.Path)
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 	}
 }
 
@@ -44,7 +44,7 @@ func mangaHandler(w http.ResponseWriter, r *http.Request) {
 
 	m, err := manga.Fetch(r.Context(), id, r.URL.Query())
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 

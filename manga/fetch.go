@@ -39,6 +39,9 @@ func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []chapter.C
 		return nil, err
 	}
 
+	queryParams.Set("order[chapter]", "asc")
+	queryParams.Set("translatedLanguage[]", shared.GlobalOptions.Language)
+
 	data, err := shared.QueryAPI[shared.Data[[]chapter.Chapter]](ctx, queryPath, queryParams)
 
 	return data.Data, err

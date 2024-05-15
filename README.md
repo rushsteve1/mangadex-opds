@@ -29,3 +29,8 @@ We want to be respectful of MangaDex and their
 - [OPDS-PSE 1.0](https://github.com/anansi-project/opds-pse/blob/master/v1.0.md)
 - [EPUB](https://www.w3.org/TR/epub-33/)
 - [ComicInfo.xml](https://github.com/anansi-project/comicinfo/blob/main/DOCUMENTATION.md)
+
+## Thanks
+
+- The 
+- Dani from the [Panels](https://panels.app)

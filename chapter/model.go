@@ -36,20 +36,23 @@ func (c Chapter) FullTitle() string {
 
 	// TODO manga title
 
-	if c.Attributes.Title != "" {
-		builder.WriteString(c.Attributes.Title)
-
-	}
-
-	if c.Attributes.Volume != "" {
-		builder.WriteString(" - vol ")
-		builder.WriteString(c.Attributes.Volume)
-	}
-
 	if c.Attributes.Chapter != "" {
-		builder.WriteString(" - ch ")
+		builder.WriteString("Chapter ")
 		builder.WriteString(c.Attributes.Chapter)
 	}
 
-	return builder.String()
+	if c.Attributes.Volume != "" {
+		builder.WriteString(" [Vol. ")
+		builder.WriteString(c.Attributes.Volume)
+		builder.WriteString("]")
+	}
+
+	if c.Attributes.Title != "" {
+		if c.Attributes.Chapter != "" || c.Attributes.Volume != "" {
+			builder.WriteString(" - ")
+		}
+		builder.WriteString(c.Attributes.Title)
+	}
+
+	return strings.TrimSpace(builder.String())
 }

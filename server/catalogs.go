@@ -10,7 +10,7 @@ import (
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	err := rootTemplate(w)
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 	}
 }
 
@@ -21,13 +21,13 @@ func catalogSearchHandler(id string, title string, term string, order string) ht
 
 		m, err := manga.Search(r.Context(), params)
 		if err != nil {
-			die(w, r, err)
+			httpError(w, r, err)
 			return
 		}
 
 		err = manga.MangaListFeed(w, id, title, m, r.URL.Path)
 		if err != nil {
-			die(w, r, err)
+			httpError(w, r, err)
 		}
 	}
 }

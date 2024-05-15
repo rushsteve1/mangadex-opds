@@ -3,3 +3,7 @@
 *.cbz
 *.epub
 tmp/
+
+.env
+
+__debug*

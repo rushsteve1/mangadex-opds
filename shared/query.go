@@ -68,13 +68,17 @@ func QueryAPI[T any](ctx context.Context, queryPath string, queryParams url.Valu
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode != http.StatusOK {
+		return out, fmt.Errorf("upstream error: %s", res.Status)
+	}
+
 	err = json.NewDecoder(res.Body).Decode(&out)
 
 	return out, err
 }
 
 // QueryImage is used to fetch an image from the given URL.
-// Only PNG and JPG images are supported, for compatibility with EPUB.
+// Only PNG and JPG images are supported, for compatibility.
 func QueryImage(ctx context.Context, imgUrl *url.URL, w io.Writer) (err error) {
 	slog.InfoContext(ctx, "querying image", "url", imgUrl.String())
 
@@ -91,6 +95,10 @@ func QueryImage(ctx context.Context, imgUrl *url.URL, w io.Writer) (err error) {
 		return err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("upstream error: %s", res.Status)
+	}
 
 	_, err = io.Copy(w, res.Body)
 

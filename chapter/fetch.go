@@ -1,7 +1,6 @@
 package chapter
 
 import (
-	"cmp"
 	"context"
 	"log/slog"
 	"net/url"
@@ -28,7 +27,7 @@ func Fetch(ctx context.Context, id uuid.UUID, queryParams url.Values) (c Chapter
 	// TODO optimize these
 	defaultParams := url.Values{
 		"includes[]":           []string{"scanlation_group" /*"manga"*/},
-		"translatedLanguage[]": []string{cmp.Or(shared.GlobalOptions.Language, "en")},
+		"translatedLanguage[]": []string{shared.GlobalOptions.Language},
 	}
 
 	for k, v := range defaultParams {
@@ -50,7 +49,6 @@ type imageUrlResponse struct {
 	} `json:"chapter"`
 }
 
-const MDUploadsURL = "https://uploads.mangadex.org"
 
 // FetchImageURLs gets the list of image URLs that correspond to this [Chapter].
 // These URLs are not part of the normal MangaDex API, and are usually fetched
@@ -73,16 +71,19 @@ func (c Chapter) FetchImageURLs(ctx context.Context) (imgUrls []*url.URL, err er
 		return nil, err
 	}
 
+	var dName string
 	var imgStrs []string
 	if shared.GlobalOptions.DataSaver {
+		dName = "data-saver"
 		imgStrs = resp.Chapter.DataSaver
 	} else {
+		dName = "data"
 		imgStrs = resp.Chapter.Data
 	}
 
 	// If this option is enabled then overwrire the base url
 	if shared.GlobalOptions.MDUploads {
-		resp.BaseUrl = MDUploadsURL
+		resp.BaseUrl = shared.UploadsURL.String()
 	}
 
 	// Pre-allocate the slice
@@ -94,7 +95,7 @@ func (c Chapter) FetchImageURLs(ctx context.Context) (imgUrls []*url.URL, err er
 			return nil, err
 		}
 
-		imgUrl.Path, err = url.JoinPath("data", resp.Chapter.Hash, imgStr)
+		imgUrl.Path, err = url.JoinPath(dName, resp.Chapter.Hash, imgStr)
 		if err != nil {
 			return nil, err
 		}

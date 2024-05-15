@@ -15,25 +15,25 @@
 
     {{ range .MangaList }}
     <entry>
-    <title>{{ .TrTitle }}</title>
-    <id>urn:uuid:{{ .ID }}</id>
-    <content type="text">{{ html .TrDesc }}</content>
-    <updated>{{ datef .Attributes.UpdatedAt }}</updated>
+        <title>{{ .TrTitle }}</title>
+        <id>urn:uuid:{{ .ID }}</id>
+        <content type="text">{{ html .TrDesc }}</content>
+        <updated>{{ datef .Attributes.UpdatedAt }}</updated>
 
-    <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="subsection" href="{{ .URL }}" />
+        <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="subsection" href="{{ .URL }}" />
 
     {{ with .GetRelData }}
     {{ range .Authors }}
-    <author>
-        <name>{{ .Name }}</name>
+        <author>
+            <name>{{ .Name }}</name>
         {{ if ne .URI nil }}
-        <uri>{{ html .URI }}</uri>
+            <uri>{{ html .URI }}</uri>
         {{ end }}
-    </author>
+        </author>
     {{ end }}
 
-    <link href="{{ .CoverURL }}" rel="http://opds-spec.org/image" type="{{ mime .CoverURL }}" />
-    <link href="{{printf "%s.256.jpg" .CoverURL }}" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail" />
+        <link href="{{ .CoverURL }}" rel="http://opds-spec.org/image" type="{{ mime .CoverURL }}" />
+        <link href="{{printf "%s.256.jpg" .CoverURL }}" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail" />
     {{end}}
     </entry>
     {{ end }}

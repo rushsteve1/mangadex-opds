@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"io"
 	"mime"
 	"net/http"
 	"net/url"
@@ -35,40 +36,40 @@ func chapterHandler(w http.ResponseWriter, r *http.Request) {
 func imageHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(r.PathValue("id"))
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
 	pageStr := r.URL.Query().Get("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
 	// By checking this now we avoid the trips to the API
 	if page < 0 {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
 	// TODO we probably want to be able to differentiate upstream errors from network errors
 	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
 	imgURLs, err := c.FetchImageURLs(r.Context())
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
 	// Pages are zero-indexed
 	if page >= len(imgURLs) {
 		err = fmt.Errorf("page %d is out of bounds, max %d", page, len(imgURLs)-1)
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
@@ -77,7 +78,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = shared.QueryImage(r.Context(), imgURL, w)
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 	}
 }
 
@@ -90,7 +91,7 @@ func epubHandler(w http.ResponseWriter, r *http.Request) {
 
 	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
@@ -101,7 +102,7 @@ func epubHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = c.WriteEpub(r.Context(), w)
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 	}
 }
 
@@ -113,7 +114,7 @@ func cbzHandler(w http.ResponseWriter, r *http.Request) {
 
 	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 		return
 	}
 
@@ -124,8 +125,31 @@ func cbzHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO etags and caching?
 
-	err = c.WriteEpub(r.Context(), w)
+	err = c.WriteCBZ(r.Context(), w)
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
+	}
+}
+
+func coversHandler(w http.ResponseWriter, r *http.Request) {
+	coverUrl := shared.UploadsURL
+	coverUrl.Path = r.URL.Path
+
+	resp, err := http.Get(coverUrl.String())
+	if err != nil {
+		httpError(w, r, err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		httpError(w, r, fmt.Errorf("upstream error: %s", resp.Status))
+		return
+	}
+
+	_, err = io.Copy(w, resp.Body)
+	if err != nil {
+		httpError(w, r, err)
+		return
 	}
 }

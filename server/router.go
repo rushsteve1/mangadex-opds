@@ -1,9 +1,25 @@
 package server
 
 import (
+	"expvar"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
+
+	"github.com/rushsteve1/mangadex-opds/shared"
 )
+
+func init() {
+	// Setup expvars
+	expvar.Publish("buildinfo", (expvar.Func)(func() any {
+		info, _ := debug.ReadBuildInfo()
+		return info
+	}))
+
+	expvar.Publish("config", (expvar.Func)(func() any {
+		return shared.GlobalOptions
+	}))
+}
 
 func Router() *http.ServeMux {
 	mux := http.NewServeMux()
@@ -25,8 +41,17 @@ func Router() *http.ServeMux {
 
 	mux.HandleFunc("/manga/{id}", mangaHandler)
 
-	mux.HandleFunc("/chapter/{id}/epub", epubHandler)
+	mux.HandleFunc("/chapter/{id}", cbzHandler)
 	mux.HandleFunc("/chapter/{id}/cbz", cbzHandler)
+	mux.HandleFunc("/chapter/{id}/epub", epubHandler)
+
+	// Panels hits this endpoint even when giving it a MD cover URL
+	mux.HandleFunc("/covers/", coversHandler)
+
+	// Enable expvars endpoint
+	if shared.GlobalOptions.ExpVars {
+		mux.Handle("/debug/vars", expvar.Handler())
+	}
 
 	outerMux := http.NewServeMux()
 	outerMux.HandleFunc("/", SlogMiddleware(mux.ServeHTTP))
@@ -38,16 +63,17 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// This is the 404 handler
 	if r.URL.Path != "/" {
 		http.Error(w, "not found", http.StatusNotFound)
+		slog.WarnContext(r.Context(), "404 response", "url", r.URL.String())
 		return
 	}
 
 	err := indexTemplate(w)
 	if err != nil {
-		die(w, r, err)
+		httpError(w, r, err)
 	}
 }
 
-func die(w http.ResponseWriter, r *http.Request, err error) {
+func httpError(w http.ResponseWriter, r *http.Request, err error) {
 	slog.ErrorContext(r.Context(), "internal server error", "error", err.Error(), "path", r.URL.Path)
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }

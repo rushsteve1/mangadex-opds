@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	var err error
+	shared.LoadDotEnv()
 	shared.GlobalOptions = shared.ReadOptionsFromEnv()
 
 	srv := http.Server{
@@ -21,6 +21,6 @@ func main() {
 
 	slog.Info("starting server", "addr", srv.Addr)
 
-	err = srv.ListenAndServe()
+	err := srv.ListenAndServe()
 	slog.Error(err.Error())
 }

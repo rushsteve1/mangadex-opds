@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
+	"strings"
 )
 
 var GlobalOptions Options
@@ -17,6 +18,7 @@ type Options struct {
 	DataSaver bool
 	MDUploads bool
 	DevApi    bool
+	ExpVars   bool
 }
 
 var defaultHost = url.URL{
@@ -42,6 +44,7 @@ func ReadOptionsFromEnv() Options {
 		DataSaver: env("DATA_SAVER", false),
 		MDUploads: env("MD_UPLOADS", false),
 		DevApi:    env("DEV_API", false),
+		ExpVars:   env("EXP_VARS", true),
 	}
 }
 
@@ -52,6 +55,7 @@ func TestOptions() Options {
 		Language:  "en",
 		DataSaver: true,
 		DevApi:    true,
+		ExpVars:   true,
 	}
 }
 
@@ -70,4 +74,28 @@ func env[T any](key string, def T) (out T) {
 	}
 
 	return out
+}
+
+func LoadDotEnv() {
+	envFile, err := os.ReadFile(".env")
+	if err != nil {
+		slog.Warn("could not load .env file, ignoring")
+	}
+
+	lines := strings.Split(string(envFile), "\n")
+
+	for i, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		key, val, ok := strings.Cut(line, "=")
+		if !ok {
+			slog.Warn("not enough parts in env string", "line number", i+1)
+			continue
+		}
+
+		os.Setenv(strings.TrimSpace(key), strings.TrimSpace(val))
+	}
 }

@@ -4,58 +4,22 @@ import (
 	"archive/zip"
 	"context"
 	"io"
-	"path"
-
-	"golang.org/x/sync/errgroup"
-
-	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
 // WriteEpub will write an EPUB file for the current [Chapter] to the given [io.Writer].
-// As a bit of a trick the generated EPUBs are also valid CBZ files.
 func (c Chapter) WriteEpub(ctx context.Context, w io.Writer) (err error) {
-	z := zip.NewWriter(w)
-	defer z.Close()
+	// A CBZ is almost a valid EPUB so we can use that as the base
+	c.WriteCBZ(ctx, w)
 
-	err = z.SetComment(c.FullTitle())
-
-	imgUrls, err := c.FetchImageURLs(ctx)
-	imgNames := make([]string, len(imgUrls))
-
-	eg, ctx := errgroup.WithContext(ctx)
-
-	// Fetch and add the image files in parallel
-	for i, img := range imgUrls {
-		eg.Go(func() error {
-			imgNames[i] = path.Base(img.String())
-
-			// Images will not be compressed, just stored
-			// This saves a lot of time and performance at the cost of bigger EPUB files
-			// But considering MangaDex is fine with hosting those I assume they're already optimized
-			w, err = z.CreateHeader(&zip.FileHeader{Name: imgNames[i], Method: zip.Store})
-			if err != nil {
-				return err
-			}
-
-			return shared.QueryImage(ctx, img, w)
-		})
-	}
-
-	err = eg.Wait()
-	if err != nil {
-		return err
-	}
-
-	err = c.writeMetadata(z)
+	// err = c.writeEpubMetadata(z)
 
 	return err
 }
 
-// TODO this
+// TODO implement this function
 // - Epub metadata
 // - Epub structure
-// - ComicInfo.xml
-func (c Chapter) writeMetadata(z *zip.Writer) (err error) {
+func (c Chapter) writeEpubMetadata(z *zip.Writer) (err error) {
 	w, err := z.Create("META-INF/container.xml")
 	if err != nil {
 		return err
