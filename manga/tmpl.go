@@ -47,7 +47,7 @@ func MangaListFeed(w io.Writer, id string, title string, mangaList []Manga, self
 		Host:      shared.GlobalOptions.Host.String(),
 		UpdatedAt: time.Now().UTC().Format(time.RFC3339Nano),
 		Title:     title,
-		Version:   shared.Version(),
+		Version:   shared.Version,
 	}
 
 	return tmpl.ExecuteTemplate(w, "list.tmpl.xml", data)
@@ -70,7 +70,7 @@ func MangaChapterFeed(ctx context.Context, w io.Writer, m Manga, queryParams url
 		Manga:    m,
 		Chapters: chapters,
 		Host:     shared.GlobalOptions.Host.String(),
-		Version:  shared.Version(),
+		Version:  shared.Version,
 	}
 
 	return tmpl.ExecuteTemplate(w, "chapters.tmpl.xml", data)

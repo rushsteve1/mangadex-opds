@@ -49,7 +49,6 @@ type imageUrlResponse struct {
 	} `json:"chapter"`
 }
 
-
 // FetchImageURLs gets the list of image URLs that correspond to this [Chapter].
 // These URLs are not part of the normal MangaDex API, and are usually fetched
 // from  the Mangadex@Home servers via mangadex.network.

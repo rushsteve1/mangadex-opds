@@ -27,7 +27,7 @@ type indexData struct {
 func indexTemplate(w io.Writer) error {
 	data := indexData{
 		Host:    shared.GlobalOptions.Host.String(),
-		Version: shared.Version(),
+		Version: shared.Version,
 	}
 
 	return tmpl.ExecuteTemplate(w, "index.tmpl.html", data)
@@ -43,7 +43,7 @@ func rootTemplate(w io.Writer) error {
 	data := rootData{
 		UpdatedAt: time.Now().UTC().Format(time.RFC3339Nano),
 		Host:      shared.GlobalOptions.Host.String(),
-		Version:   shared.Version(),
+		Version:   shared.Version,
 	}
 
 	return tmpl.ExecuteTemplate(w, "root.tmpl.xml", data)

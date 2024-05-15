@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"cmp"
 	"encoding/json"
 	"log/slog"
 	"net/url"
@@ -27,6 +28,25 @@ type Options struct {
 var defaultBind = url.URL{
 	Scheme: "http",
 	Host:   "0.0.0.0:4444",
+}
+
+var Version string
+
+func init() {
+	info, _ := debug.ReadBuildInfo()
+
+	var rev string
+	for _, s := range info.Settings {
+		if s.Key == "vcs.revision" {
+			rev = s.Value
+		}
+	}
+
+	if len(rev) > 8 {
+		rev = rev[:8]
+	}
+
+	Version = cmp.Or(rev, info.Main.Version)
 }
 
 func ReadOptionsFromEnv() Options {
@@ -109,9 +129,4 @@ func LoadDotEnv() {
 
 		os.Setenv(strings.TrimSpace(key), strings.TrimSpace(val))
 	}
-}
-
-func Version() string {
-	info, _ := debug.ReadBuildInfo()
-	return info.Main.Version
 }
