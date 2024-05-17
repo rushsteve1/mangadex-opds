@@ -1,15 +1,17 @@
-package chapter
+package formats
 
 import (
 	"archive/zip"
 	"context"
 	"io"
+
+	"github.com/rushsteve1/mangadex-opds/models"
 )
 
 // WriteEpub will write an EPUB file for the current [Chapter] to the given [io.Writer].
-func (c Chapter) WriteEpub(ctx context.Context, w io.Writer) (err error) {
+func WriteEpub(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 	// A CBZ is almost a valid EPUB so we can use that as the base
-	c.WriteCBZ(ctx, w)
+	WriteCBZ(ctx, c, w)
 
 	// err = c.writeEpubMetadata(z)
 
@@ -19,7 +21,7 @@ func (c Chapter) WriteEpub(ctx context.Context, w io.Writer) (err error) {
 // TODO implement this function
 // - Epub metadata
 // - Epub structure
-func (c Chapter) writeEpubMetadata(z *zip.Writer) (err error) {
+func writeEpubMetadata(c *models.Chapter, z *zip.Writer) (err error) {
 	w, err := z.Create("META-INF/container.xml")
 	if err != nil {
 		return err

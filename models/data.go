@@ -1,6 +1,10 @@
-package shared
+package models
 
-import "cmp"
+import (
+	"cmp"
+
+	"github.com/rushsteve1/mangadex-opds/shared"
+)
 
 type Data[T any] struct {
 	Result string `json:"result"`
@@ -11,5 +15,5 @@ type Data[T any] struct {
 
 func Tr(m map[string]string) string {
 	// ja-ro is a special locale that MangaDex uses which should always exist
-	return cmp.Or(m[GlobalOptions.Language], m["ja-ro"], "Unknown")
+	return cmp.Or(m[shared.GlobalOptions.Language], m["ja-ro"], "Unknown")
 }

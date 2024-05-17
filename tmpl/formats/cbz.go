@@ -1,4 +1,4 @@
-package chapter
+package formats
 
 import (
 	"archive/zip"
@@ -6,8 +6,11 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"path"
 
+	"github.com/rushsteve1/mangadex-opds/models"
 	"github.com/rushsteve1/mangadex-opds/shared"
+	"github.com/rushsteve1/mangadex-opds/tmpl"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -17,7 +20,7 @@ type chapterImage struct {
 	Data  bytes.Buffer
 }
 
-func (c Chapter) WriteCBZ(ctx context.Context, w io.Writer) (err error) {
+func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 	z := zip.NewWriter(w)
 
 	err = z.SetComment(c.FullTitle())
@@ -40,7 +43,8 @@ func (c Chapter) WriteCBZ(ctx context.Context, w io.Writer) (err error) {
 
 		for _, img := range imgUrls {
 			eg.Go(func() error {
-				chImg := chapterImage{Name: img.String()}
+				imgName := path.Base(img.String())
+				chImg := chapterImage{Name: imgName}
 
 				err := shared.QueryImage(ctx, img, &chImg.Data)
 				if err != nil {
@@ -72,6 +76,13 @@ func (c Chapter) WriteCBZ(ctx context.Context, w io.Writer) (err error) {
 
 		io.Copy(w, &img.Data)
 	}
+
+	w, err = z.Create("ComicInfo.xml")
+	if err != nil {
+		return err
+	}
+
+	tmpl.ComicInfoXML(c, w)
 
 	err = <-doneChan
 	if err != nil {

@@ -1,30 +1,28 @@
-package server
+package tmpl
 
 import (
-	"embed"
 	"io"
-	"text/template"
 	"time"
 
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
-//go:embed templates
-var tmplFS embed.FS
-var tmpl = template.Must(template.ParseFS(tmplFS, "templates/*"))
+func OpenSearchXML(w io.Writer) error {
+	f, err := tmplFS.Open("templates/opensearch.xml")
+	if err != nil {
+		return err
+	}
 
-//go:embed favicon.ico
-var favicon []byte
-
-//go:embed robots.txt
-var robotstxt []byte
+	_, err = io.Copy(w, f)
+	return err
+}
 
 type indexData struct {
 	Host    string
 	Version string
 }
 
-func indexTemplate(w io.Writer) error {
+func IndexTemplate(w io.Writer) error {
 	data := indexData{
 		Host:    shared.GlobalOptions.Host.String(),
 		Version: shared.Version,
@@ -39,7 +37,7 @@ type rootData struct {
 	Version   string
 }
 
-func rootTemplate(w io.Writer) error {
+func RootTemplate(w io.Writer) error {
 	data := rootData{
 		UpdatedAt: time.Now().UTC().Format(time.RFC3339Nano),
 		Host:      shared.GlobalOptions.Host.String(),

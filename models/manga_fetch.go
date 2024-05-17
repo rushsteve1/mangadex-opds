@@ -1,4 +1,4 @@
-package manga
+package models
 
 import (
 	"context"
@@ -6,11 +6,10 @@ import (
 	"net/url"
 
 	"github.com/google/uuid"
-	"github.com/rushsteve1/mangadex-opds/chapter"
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
-func Fetch(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Manga, err error) {
+func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Manga, err error) {
 	slog.InfoContext(ctx, "fetching manga", "id", id)
 
 	queryPath, err := url.JoinPath("manga", id.String())
@@ -20,7 +19,7 @@ func Fetch(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Manga, 
 
 	queryParams = shared.WithDefaultParams(queryParams)
 
-	data, err := shared.QueryAPI[shared.Data[Manga]](ctx, queryPath, queryParams)
+	data, err := shared.QueryAPI[Data[Manga]](ctx, queryPath, queryParams)
 
 	m = data.Data
 	m.MergeTitles()
@@ -31,12 +30,12 @@ func Fetch(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Manga, 
 func Search(ctx context.Context, queryParams url.Values) (ms []Manga, err error) {
 	queryParams = shared.WithDefaultParams(queryParams)
 
-	data, err := shared.QueryAPI[shared.Data[[]Manga]](ctx, "manga", queryParams)
+	data, err := shared.QueryAPI[Data[[]Manga]](ctx, "manga", queryParams)
 
 	return data.Data, err
 }
 
-func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []chapter.Chapter, err error) {
+func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []Chapter, err error) {
 	queryPath, err := url.JoinPath("manga", m.ID.String(), "feed")
 	if err != nil {
 		return nil, err
@@ -50,7 +49,7 @@ func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []chapter.C
 	queryParams.Set("translatedLanguage[]", shared.GlobalOptions.Language)
 	queryParams.Set("includeEmptyPages", "0")
 
-	data, err := shared.QueryAPI[shared.Data[[]chapter.Chapter]](ctx, queryPath, queryParams)
+	data, err := shared.QueryAPI[Data[[]Chapter]](ctx, queryPath, queryParams)
 
 	return data.Data, err
 }

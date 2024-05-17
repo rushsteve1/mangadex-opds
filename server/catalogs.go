@@ -5,13 +5,14 @@ import (
 	"mime"
 	"net/http"
 
-	"github.com/rushsteve1/mangadex-opds/manga"
+	"github.com/rushsteve1/mangadex-opds/models"
+	"github.com/rushsteve1/mangadex-opds/tmpl"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", mime.TypeByExtension(".xml"))
 
-	err := rootTemplate(w)
+	err := tmpl.RootTemplate(w)
 	if err != nil {
 		httpError(w, r, err)
 	}
@@ -24,13 +25,13 @@ func makeCatalogHandler(id string, title string, term string, order string) http
 		params := r.URL.Query()
 		params.Add(fmt.Sprintf("order[%s]", term), order)
 
-		m, err := manga.Search(r.Context(), params)
+		m, err := models.Search(r.Context(), params)
 		if err != nil {
 			httpError(w, r, err)
 			return
 		}
 
-		err = manga.MangaListFeed(w, id, title, m, r.URL.Path)
+		err = tmpl.MangaListFeed(w, id, title, m, r.URL.Path)
 		if err != nil {
 			httpError(w, r, err)
 		}

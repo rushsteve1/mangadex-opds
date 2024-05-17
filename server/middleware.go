@@ -22,14 +22,24 @@ func SlogMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		)
 
 		if r.URL.Host != "" && r.URL.Host != shared.GlobalOptions.Host.Host {
-			slog.WarnContext(r.Context(), "request from non-matching host", "actual", r.URL.Host, "expected", shared.GlobalOptions.Host.Host)
+			slog.WarnContext(
+				r.Context(),
+				"request from non-matching host",
+				"actual",
+				r.URL.Host,
+				"expected",
+				shared.GlobalOptions.Host.Host,
+			)
 		}
 
 		next(w, r)
 	}
 }
 
-func HtmlXmlSplitterMiddleware(htmlNext http.HandlerFunc, xmlNext http.HandlerFunc) http.HandlerFunc {
+func HtmlXmlSplitterMiddleware(
+	htmlNext http.HandlerFunc,
+	xmlNext http.HandlerFunc,
+) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		accepts := r.Header.Get("Accepts")
 

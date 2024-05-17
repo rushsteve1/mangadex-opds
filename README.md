@@ -26,9 +26,9 @@ We want to be respectful of MangaDex and their
 
 - [OPDS](https://specs.opds.io/opds-1.2)
 - [ATOM](https://validator.w3.org/feed/docs/atom.html)
-- [OPDS-PSE](https://github.com/anansi-project/opds-pse/blob/master/v1.0.md)
+- [OPDS-PSE](https://anansi-project.github.io/docs/opds-pse/specs/v1.0)
 - [EPUB](https://www.w3.org/TR/epub-33/)
-- [ComicInfo.xml](https://github.com/anansi-project/comicinfo/blob/main/DOCUMENTATION.md)
+- [ComicInfo.xml](hhttps://anansi-project.github.io/docs/comicinfo/documentation)
 
 ## Thanks
 

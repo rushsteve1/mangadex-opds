@@ -1,7 +1,8 @@
-package chapter
+package models
 
 import (
 	"cmp"
+	"log/slog"
 	"net/url"
 	"strings"
 	"time"
@@ -11,9 +12,11 @@ import (
 )
 
 type Chapter struct {
-	ID            uuid.UUID             `json:"id"`
-	Attributes    ChapterAttributes     `json:"attributes"`
-	Relationships []shared.Relationship `json:"relationships"`
+	ID            uuid.UUID         `json:"id"`
+	Attributes    ChapterAttributes `json:"attributes"`
+	Relationships []Relationship    `json:"relationships"`
+	manga         *Manga
+	imgUrls       []*url.URL
 }
 
 type ChapterAttributes struct {
@@ -35,7 +38,16 @@ func (c Chapter) URL() string {
 func (c Chapter) FullTitle() string {
 	builder := strings.Builder{}
 
-	// TODO manga title
+	m := c.Manga()
+	var title string
+	if m == nil {
+		title = "Unknown Manga"
+	} else {
+		title = m.TrTitle()
+	}
+
+	builder.WriteString(title)
+	builder.WriteString(" - ")
 
 	if c.Attributes.Volume != "" {
 		builder.WriteString("[Vol. ")
@@ -47,11 +59,31 @@ func (c Chapter) FullTitle() string {
 	builder.WriteString(cmp.Or(c.Attributes.Chapter, "Unknown"))
 
 	if c.Attributes.Title != "" {
-		if c.Attributes.Chapter != "" || c.Attributes.Volume != "" {
-			builder.WriteString(" - ")
-		}
+		builder.WriteString(" - ")
 		builder.WriteString(c.Attributes.Title)
 	}
 
 	return strings.TrimSpace(builder.String())
+}
+
+func (c *Chapter) Manga() *Manga {
+	// Cache the cast manga so that we don't have to do it again
+	if c.manga != nil {
+		return c.manga
+	}
+
+	for _, rel := range c.Relationships {
+		if rel.Type == "manga" {
+			m, err := CastRelationship[Manga](&rel)
+			if err != nil {
+				slog.Error("error casting to manga", "error", err)
+				return nil
+			}
+
+			c.manga = &m
+			return &m
+		}
+	}
+
+	return nil
 }

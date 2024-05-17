@@ -43,7 +43,11 @@ func UserAgent() string {
 }
 
 // QueryAPI is used to fetch data from the MangaDex API.
-func QueryAPI[T any](ctx context.Context, queryPath string, queryParams url.Values) (out T, err error) {
+func QueryAPI[T any](
+	ctx context.Context,
+	queryPath string,
+	queryParams url.Values,
+) (out T, err error) {
 	var queryUrl url.URL
 	if GlobalOptions.DevApi {
 		queryUrl = DevUrl

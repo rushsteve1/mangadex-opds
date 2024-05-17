@@ -1,4 +1,4 @@
-package manga
+package models
 
 import (
 	"cmp"
@@ -10,9 +10,10 @@ import (
 )
 
 type Manga struct {
-	ID            uuid.UUID             `json:"id"`
-	Attributes    MangaAttributes       `json:"attributes"`
-	Relationships []shared.Relationship `json:"relationships"`
+	ID            uuid.UUID       `json:"id"`
+	Attributes    MangaAttributes `json:"attributes"`
+	Relationships []Relationship  `json:"relationships"`
+	relData       *RelData
 }
 
 type MangaAttributes struct {
@@ -32,7 +33,7 @@ func (m Manga) URL() string {
 	return u.String()
 }
 
-func (m Manga) MergeTitles() {
+func (m *Manga) MergeTitles() {
 	for _, at := range m.Attributes.AltTitles {
 		for k, v := range at {
 			_, found := m.Attributes.Title[k]
@@ -44,11 +45,11 @@ func (m Manga) MergeTitles() {
 }
 
 func (m Manga) TrTitle() string {
-	return shared.Tr(m.Attributes.Title)
+	return Tr(m.Attributes.Title)
 }
 
 func (m Manga) TrDesc() string {
-	return shared.Tr(m.Attributes.Description)
+	return Tr(m.Attributes.Description)
 }
 
 type RelData struct {
@@ -61,7 +62,7 @@ type Author struct {
 	URI  string
 }
 
-func ParseAuthor(m map[string]any) (a Author) {
+func parseAuthor(m map[string]any) (a Author) {
 	ustr := cmp.Or(m["website"], m["twitter"], m["youtube"], m["tumblr"], m["pixiv"])
 	s, ok := ustr.(string)
 	if ok {
@@ -79,14 +80,18 @@ func ParseAuthor(m map[string]any) (a Author) {
 	return a
 }
 
-func (m Manga) GetRelData() (rd RelData) {
+func (m *Manga) GetRelData() (rd RelData) {
+	if m.relData != nil {
+		return *m.relData
+	}
+
 	for _, rel := range m.Relationships {
 		switch rel.Type {
 		case "author":
 			fallthrough
 		case "artist":
 			// TODO dedup same author/artist
-			rd.Authors = append(rd.Authors, ParseAuthor(rel.Attributes))
+			rd.Authors = append(rd.Authors, parseAuthor(rel.Attributes))
 		case "cover_art":
 			u := shared.UploadsURL
 			fn, ok := rel.Attributes["fileName"].(string)
@@ -96,5 +101,7 @@ func (m Manga) GetRelData() (rd RelData) {
 			}
 		}
 	}
+
+	m.relData = &rd
 	return rd
 }

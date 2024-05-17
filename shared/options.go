@@ -53,7 +53,13 @@ func ReadOptionsFromEnv() Options {
 	h := env("HOST", "http://localhost:4444")
 	u, err := url.Parse(h)
 	if err != nil {
-		slog.Error("error reading HOST variable, using fallback", "error", err, "fallback", defaultBind.String())
+		slog.Error(
+			"error reading HOST variable, using fallback",
+			"error",
+			err,
+			"fallback",
+			defaultBind.String(),
+		)
 	}
 	if u == nil {
 		u = &defaultBind

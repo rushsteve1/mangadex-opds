@@ -9,8 +9,9 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
-	"github.com/rushsteve1/mangadex-opds/chapter"
+	"github.com/rushsteve1/mangadex-opds/models"
 	"github.com/rushsteve1/mangadex-opds/shared"
+	"github.com/rushsteve1/mangadex-opds/tmpl/formats"
 )
 
 func init() {
@@ -53,7 +54,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO we probably want to be able to differentiate upstream errors from network errors
-	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
+	c, err := models.FetchChapter(r.Context(), id, r.URL.Query())
 	if err != nil {
 		httpError(w, r, err)
 		return
@@ -86,18 +87,19 @@ func epubHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
+	c, err := models.FetchChapter(r.Context(), id, r.URL.Query())
 	if err != nil {
 		httpError(w, r, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(".epub"))
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s.epub"`, c.FullTitle()))
+	w.Header().
+		Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s.epub"`, c.FullTitle()))
 
 	// TODO etags and caching?
 
-	err = c.WriteEpub(r.Context(), w)
+	err = formats.WriteEpub(r.Context(), &c, w)
 	if err != nil {
 		httpError(w, r, err)
 	}
@@ -109,7 +111,7 @@ func cbzHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid uuid", http.StatusBadRequest)
 	}
 
-	c, err := chapter.Fetch(r.Context(), id, r.URL.Query())
+	c, err := models.FetchChapter(r.Context(), id, r.URL.Query())
 	if err != nil {
 		httpError(w, r, err)
 		return
@@ -118,11 +120,12 @@ func cbzHandler(w http.ResponseWriter, r *http.Request) {
 	// We're cheating a bit, the EPUBs that are created are also valid CBZs!
 	// So as long as we tell the client that everything should work!
 	w.Header().Set("Content-Type", mime.TypeByExtension(".cbz")) // TODO wrong mimetype?
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s.cbz"`, c.FullTitle()))
+	w.Header().
+		Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s.cbz"`, c.FullTitle()))
 
 	// TODO etags and caching?
 
-	err = c.WriteCBZ(r.Context(), w)
+	err = formats.WriteCBZ(r.Context(), &c, w)
 	if err != nil {
 		httpError(w, r, err)
 	}

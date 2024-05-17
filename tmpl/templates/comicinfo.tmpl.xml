@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ComicInfo>
+    <Title>{{ .FullTitle }}</Title>
+    <Series>{{ .Manga.TrTitle }}</Series>
+    <Number>{{ .Attributes.Chapter }}</Number>
+    <Volume>{{ .Attributes.Volume }}</Volume>
+    <PageCount>{{ .Attributes.Pages }}</PageCount>
+    <Genre>{{ .Manga.Attributes.Demographic }}</Genre>
+    <LanguageISO>{{ .Attributes.TranslatedLanguage }}</LanguageISO>
+    <Manga>YesAndRightToLeft</Manga>
+</ComicInfo>

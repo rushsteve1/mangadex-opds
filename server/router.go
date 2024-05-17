@@ -1,13 +1,21 @@
 package server
 
 import (
+	_ "embed"
 	"expvar"
 	"log/slog"
 	"net/http"
 	"runtime/debug"
 
 	"github.com/rushsteve1/mangadex-opds/shared"
+	"github.com/rushsteve1/mangadex-opds/tmpl"
 )
+
+//go:embed favicon.ico
+var favicon []byte
+
+//go:embed robots.txt
+var robotstxt []byte
 
 func init() {
 	// Setup expvars
@@ -74,13 +82,20 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := indexTemplate(w)
+	err := tmpl.IndexTemplate(w)
 	if err != nil {
 		httpError(w, r, err)
 	}
 }
 
 func httpError(w http.ResponseWriter, r *http.Request, err error) {
-	slog.ErrorContext(r.Context(), "internal server error", "error", err.Error(), "path", r.URL.Path)
+	slog.ErrorContext(
+		r.Context(),
+		"internal server error",
+		"error",
+		err.Error(),
+		"path",
+		r.URL.Path,
+	)
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }
