@@ -13,16 +13,17 @@ import (
 var GlobalOptions Options
 
 type Options struct {
-	Bind          string
-	Host          url.URL
-	Language      string
-	Query         url.Values
-	DataSaver     bool
-	MDUploads     bool
-	DevApi        bool
-	ExpVars       bool
-	GzipResponses bool
-	LogLevel      slog.Level
+	Bind          string     // Address that the HTTP server will bind to
+	Host          url.URL    // Host used in generated paths, useful for proxies
+	Language      string     // Language to pull chapters for
+	Query         url.Values // Default query string parameters
+	DataSaver     bool       // Use MD's data saver mode for smaller images
+	MDUploads     bool       // Use the MD uploads endpoint instead of MD@Home
+	DevApi        bool       // Use the MD dev API
+	ExpVars       bool       // Enable the ExpVars endpoint
+	GzipResponses bool       // Enable gzipping responses
+	LogLevel      slog.Level // The log level
+	NoDownload    bool       // Disable downloading images for chapters, used in some tests
 }
 
 var defaultBind = url.URL{
@@ -49,7 +50,9 @@ func init() {
 	Version = cmp.Or(rev, info.Main.Version)
 }
 
-func ReadOptionsFromEnv() Options {
+func ReadOptionsFromEnv() {
+	slog.Debug("setting options")
+
 	h := env("HOST", "http://localhost:4444")
 	u, err := url.Parse(h)
 	if err != nil {
@@ -70,7 +73,7 @@ func ReadOptionsFromEnv() Options {
 		u.Scheme = "https"
 	}
 
-	return Options{
+	GlobalOptions = Options{
 		Bind:          env("BIND", defaultBind.Host),
 		Host:          *u,
 		Language:      env("LANGUAGE", "en"),
@@ -82,10 +85,16 @@ func ReadOptionsFromEnv() Options {
 		GzipResponses: env("GZIP_RESPONSES", true),
 		LogLevel:      env("LOG_LEVEL", slog.LevelInfo),
 	}
+
+	LoadDotEnv()
+
+	slog.SetLogLoggerLevel(GlobalOptions.LogLevel)
 }
 
-func TestOptions() Options {
-	return Options{
+func TestOptions() {
+	slog.Debug("setting test options")
+
+	GlobalOptions = Options{
 		Bind:      defaultBind.Host,
 		Host:      defaultBind,
 		Language:  "en",
@@ -94,23 +103,8 @@ func TestOptions() Options {
 		ExpVars:   true,
 		LogLevel:  slog.LevelDebug,
 	}
-}
 
-func env[T any](key string, def T) (out T) {
-	e := os.Getenv(key)
-	if len(e) == 0 {
-		return def
-	}
-
-	// TODO this is kinda annoying but also useful
-	err := json.Unmarshal([]byte(e), &out)
-	if err != nil {
-		slog.Error("config error", "key", key, "error", err)
-		os.Exit(1)
-		return out
-	}
-
-	return out
+	slog.SetLogLoggerLevel(GlobalOptions.LogLevel)
 }
 
 func LoadDotEnv() {
@@ -135,4 +129,21 @@ func LoadDotEnv() {
 
 		os.Setenv(strings.TrimSpace(key), strings.TrimSpace(val))
 	}
+}
+
+func env[T any](key string, def T) (out T) {
+	e := os.Getenv(key)
+	if len(e) == 0 {
+		return def
+	}
+
+	// TODO this is kinda annoying but also useful
+	err := json.Unmarshal([]byte(e), &out)
+	if err != nil {
+		slog.Error("config error", "key", key, "error", err)
+		os.Exit(1)
+		return out
+	}
+
+	return out
 }

@@ -5,8 +5,9 @@ import (
 	"log/slog"
 	"net/url"
 
-	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/shared"
+
+	"github.com/google/uuid"
 )
 
 func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Manga, err error) {

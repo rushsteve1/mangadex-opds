@@ -53,6 +53,8 @@ func Router() *http.ServeMux {
 	mux.HandleFunc("/chapter/{id}/cbz", cbzHandler)
 	mux.HandleFunc("/chapter/{id}/epub", epubHandler)
 
+	mux.HandleFunc("/download", downloadHandler)
+
 	// Panels hits this endpoint even when giving it a MD cover URL
 	mux.HandleFunc("/covers/", coversHandler)
 

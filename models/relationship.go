@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/rushsteve1/mangadex-opds/shared"
+
 	"golang.org/x/sync/errgroup"
 )
 

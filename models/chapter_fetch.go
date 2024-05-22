@@ -5,8 +5,9 @@ import (
 	"log/slog"
 	"net/url"
 
-	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/shared"
+
+	"github.com/google/uuid"
 )
 
 // Fetch gets the chapter information the MangaDex API and returns the [Chapter].
@@ -15,8 +16,6 @@ func FetchChapter(
 	id uuid.UUID,
 	queryParams url.Values,
 ) (c Chapter, err error) {
-	shared.GlobalOptions = shared.TestOptions()
-
 	slog.InfoContext(ctx, "fetching chapter", "id", id)
 
 	queryPath, err := url.JoinPath("chapter", id.String())
@@ -62,8 +61,6 @@ type imageUrlResponse struct {
 //
 // See also: https://api.mangadex.org/docs/04-chapter/retrieving-chapter/
 func (c *Chapter) FetchImageURLs(ctx context.Context) (imgUrls []*url.URL, err error) {
-	shared.GlobalOptions = shared.TestOptions()
-
 	// Image urls are cached off in the chapter so that they don't need to be fetched multiple times
 	if len(c.imgUrls) != 0 && c.Attributes.Pages != 0 {
 		return c.imgUrls, nil

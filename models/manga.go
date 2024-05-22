@@ -5,8 +5,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/shared"
+
+	"github.com/google/uuid"
 )
 
 type Manga struct {
@@ -45,11 +46,11 @@ func (m *Manga) MergeTitles() {
 }
 
 func (m Manga) TrTitle() string {
-	return Tr(m.Attributes.Title)
+	return shared.Tr(m.Attributes.Title)
 }
 
 func (m Manga) TrDesc() string {
-	return Tr(m.Attributes.Description)
+	return shared.Tr(m.Attributes.Description)
 }
 
 type RelData struct {

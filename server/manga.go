@@ -4,9 +4,10 @@ import (
 	"mime"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/models"
 	"github.com/rushsteve1/mangadex-opds/tmpl"
+
+	"github.com/google/uuid"
 )
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {

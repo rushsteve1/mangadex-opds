@@ -1,17 +1,22 @@
 package server
 
 import (
+	"cmp"
 	"fmt"
 	"log/slog"
 	"mime"
 	"net/http"
 	"net/url"
+	"path"
+	"regexp"
 	"strconv"
+	"strings"
 
-	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/models"
 	"github.com/rushsteve1/mangadex-opds/shared"
 	"github.com/rushsteve1/mangadex-opds/tmpl/formats"
+
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -25,10 +30,46 @@ func chapterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := r.URL
+	u := *r.URL
 	u.Path, _ = url.JoinPath(r.URL.Path, "cbz")
 
 	http.Redirect(w, r, u.String(), http.StatusSeeOther)
+}
+
+var mdRe = regexp.MustCompile(`(?:https?:\/\/)?mangadex.(?:org|cc)\/chapter\/([\w\d-]+)/?.*`)
+
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	mdUrl := r.URL.Query().Get("url")
+
+	slog.DebugContext(r.Context(), "MangaDex Chapter URL", "url", mdUrl)
+
+	// The ID is either its own param or a submatch of the regex
+	id := cmp.Or(
+		r.URL.Query().Get("id"),
+		shared.Second(mdRe.FindStringSubmatch(mdUrl)),
+	)
+
+	slog.InfoContext(r.Context(), "manual chapter download", "id", id)
+
+	if id == "" {
+		http.Error(w, "'id' or 'url' query parameter required", http.StatusBadRequest)
+		return
+	}
+
+	// If there's no specified format default to CBZ
+	format := strings.ToLower(cmp.Or(r.URL.Query().Get("format"), "cbz"))
+
+	if format != "cbz" && format != "epub" {
+		http.Error(w, "'format' parameter must be either 'cbz' or 'epub'", http.StatusBadRequest)
+		return
+	}
+
+	u := *r.URL
+	u.Path = path.Join("chapter", id, format)
+
+	slog.DebugContext(r.Context(), "redirect to", "url", u.String())
+
+	http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
 }
 
 // Implement support for OPDS-PSE 1.0

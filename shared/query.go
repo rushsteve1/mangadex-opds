@@ -84,6 +84,12 @@ func QueryAPI[T any](
 // QueryImage is used to fetch an image from the given URL.
 // Only PNG and JPG images are supported, for compatibility.
 func QueryImage(ctx context.Context, imgUrl *url.URL, w io.Writer) (err error) {
+	// In some tests we do not actually want to download the files
+	if GlobalOptions.NoDownload {
+		slog.Warn("no-download option enabled", "url", imgUrl.String())
+		return nil
+	}
+
 	slog.InfoContext(ctx, "querying image", "url", imgUrl.String())
 
 	req, err := makeRequest(ctx, imgUrl)

@@ -11,6 +11,7 @@ import (
 	"github.com/rushsteve1/mangadex-opds/models"
 	"github.com/rushsteve1/mangadex-opds/shared"
 	"github.com/rushsteve1/mangadex-opds/tmpl"
+	
 	"golang.org/x/sync/errgroup"
 )
 
@@ -32,6 +33,13 @@ func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 	if err != nil {
 		return err
 	}
+
+	w, err = z.Create("ComicInfo.xml")
+	if err != nil {
+		return err
+	}
+
+	tmpl.ComicInfoXML(c, w)
 
 	imgChan := make(chan chapterImage)
 	doneChan := make(chan error)
@@ -76,13 +84,6 @@ func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 
 		io.Copy(w, &img.Data)
 	}
-
-	w, err = z.Create("ComicInfo.xml")
-	if err != nil {
-		return err
-	}
-
-	tmpl.ComicInfoXML(c, w)
 
 	err = <-doneChan
 	if err != nil {

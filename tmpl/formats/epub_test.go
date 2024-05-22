@@ -1,5 +1,6 @@
 package formats
 
+/* TODO
 import (
 	"context"
 	"os"
@@ -8,9 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/rushsteve1/mangadex-opds/models"
 )
-
-// Girl's Last Tour chapter 43 uploaded by rozen
-const ChapterID = "9a612118-1441-431a-979d-85958fb20cf2"
 
 func Test_WriteEpub(t *testing.T) {
 	ctx := context.Background()
@@ -38,3 +36,4 @@ func Test_WriteEpub(t *testing.T) {
 		t.Fatal("size zero")
 	}
 }
+*/

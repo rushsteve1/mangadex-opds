@@ -10,8 +10,7 @@ import (
 )
 
 func main() {
-	shared.LoadDotEnv()
-	shared.GlobalOptions = shared.ReadOptionsFromEnv()
+	shared.ReadOptionsFromEnv()
 
 	slog.SetLogLoggerLevel(shared.GlobalOptions.LogLevel)
 
