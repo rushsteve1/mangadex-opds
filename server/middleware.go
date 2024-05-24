@@ -4,13 +4,13 @@ import (
 	"compress/gzip"
 	"io"
 	"log/slog"
-	"mime"
 	"net/http"
 	"strings"
 
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
+// SlogMiddleware logs out information about incoming HTTP requests.
 func SlogMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.InfoContext(
@@ -36,27 +36,6 @@ func SlogMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func HtmlXmlSplitterMiddleware(
-	htmlNext http.HandlerFunc,
-	xmlNext http.HandlerFunc,
-) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		accepts := r.Header.Get("Accepts")
-
-		if strings.Contains(accepts, mime.TypeByExtension(".html")) {
-			htmlNext(w, r)
-			return
-		}
-
-		if strings.Contains(accepts, mime.TypeByExtension(".xml")) {
-			xmlNext(w, r)
-			return
-		}
-
-		http.Error(w, "invalid accepts header", http.StatusNotAcceptable)
-	}
-}
-
 type gzipResponseWriter struct {
 	io.Writer
 	http.ResponseWriter
@@ -66,6 +45,8 @@ func (w gzipResponseWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
+// GzipMiddleware compresses the response body using GZIP if the client supports it.
+// This can be used to save a lot of bandwidth at the cost of slightly more CPU usage.
 func GzipMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {

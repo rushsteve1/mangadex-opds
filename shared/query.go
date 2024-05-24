@@ -13,16 +13,19 @@ import (
 	"runtime/debug"
 )
 
+// APIUrl is the default MangaDex API URL
 var APIUrl = url.URL{
 	Scheme: "https",
 	Host:   "api.mangadex.org",
 }
 
+// DevUrl is the MangaDex Dev API URL used in place of [APIUrl]
 var DevUrl = url.URL{
 	Scheme: "https",
 	Host:   "api.mangadex.dev",
 }
 
+// UploadsURL is the MangaDex Uploads URL used when the MDUploads option is true
 var UploadsURL = url.URL{
 	Scheme: "https",
 	Host:   "uploads.mangadex.org",
@@ -82,7 +85,7 @@ func QueryAPI[T any](
 }
 
 // QueryImage is used to fetch an image from the given URL.
-// Only PNG and JPG images are supported, for compatibility.
+// Only PNG and JPG images are supported, for compatibility with downstream CBZ and EPUB formats.
 func QueryImage(ctx context.Context, imgUrl *url.URL, w io.Writer) (err error) {
 	// In some tests we do not actually want to download the files
 	if GlobalOptions.NoDownload {

@@ -11,7 +11,7 @@ import (
 	"github.com/rushsteve1/mangadex-opds/models"
 	"github.com/rushsteve1/mangadex-opds/shared"
 	"github.com/rushsteve1/mangadex-opds/tmpl"
-	
+
 	"golang.org/x/sync/errgroup"
 )
 
@@ -21,15 +21,18 @@ type chapterImage struct {
 	Data  bytes.Buffer
 }
 
+// WriteCBZ is where everything comes together and writes a CBZ file for a [Chapter]
+// using the following steps
+//
+//  1. Set the ZIP title using [models.FullTitle]
+//  2. Create and write the [tmpl.ComicInfoXML] file
+//  3. Fetch the image URLs from the API with [models.FetchImageURL]
+//  4. Loops through the image URLs calling [shared.QueryImage] in parallel
+//  5. Adds those files to the ZIP then closes
 func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 	z := zip.NewWriter(w)
 
 	err = z.SetComment(c.FullTitle())
-	if err != nil {
-		return err
-	}
-
-	imgUrls, err := c.FetchImageURLs(ctx)
 	if err != nil {
 		return err
 	}
@@ -39,7 +42,15 @@ func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 		return err
 	}
 
-	tmpl.ComicInfoXML(c, w)
+	err = tmpl.ComicInfoXML(c, w)
+	if err != nil {
+		return err
+	}
+
+	imgUrls, err := c.FetchImageURLs(ctx)
+	if err != nil {
+		return err
+	}
 
 	imgChan := make(chan chapterImage)
 	doneChan := make(chan error)

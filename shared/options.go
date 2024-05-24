@@ -10,8 +10,11 @@ import (
 	"strings"
 )
 
+// GlobalOptions is the globally available set of options that is currently being used.
+// You should ONLY read from this value and never set it.
 var GlobalOptions Options
 
+// Options is the list of configuation options for this project.
 type Options struct {
 	Bind          string     // Address that the HTTP server will bind to
 	Host          url.URL    // Host used in generated paths, useful for proxies
@@ -31,6 +34,7 @@ var defaultBind = url.URL{
 	Host:   "0.0.0.0:4444",
 }
 
+// Version is the current version of this software calculated with [debug.ReadBuildInfo]
 var Version string
 
 func init() {
@@ -50,6 +54,8 @@ func init() {
 	Version = cmp.Or(rev, info.Main.Version)
 }
 
+// ReadOptionsFromEnv pulls in the configuation options from the environment variables
+// THEN from the .env file (which takes precedence) and loads them into [GlobalOptions].
 func ReadOptionsFromEnv() {
 	slog.Debug("setting options")
 
@@ -86,11 +92,12 @@ func ReadOptionsFromEnv() {
 		LogLevel:      env("LOG_LEVEL", slog.LevelInfo),
 	}
 
-	LoadDotEnv()
+	loadDotEnv()
 
 	slog.SetLogLoggerLevel(GlobalOptions.LogLevel)
 }
 
+// TestOptions sets the options used for testing
 func TestOptions() {
 	slog.Debug("setting test options")
 
@@ -107,7 +114,8 @@ func TestOptions() {
 	slog.SetLogLoggerLevel(GlobalOptions.LogLevel)
 }
 
-func LoadDotEnv() {
+// loadDotEnv reads a .env file in the current working directory and loads it into [GlobalOptions]
+func loadDotEnv() {
 	envFile, err := os.ReadFile(".env")
 	if err != nil {
 		slog.Warn("could not load .env file, ignoring")
@@ -131,6 +139,7 @@ func LoadDotEnv() {
 	}
 }
 
+// env is a helper that reads an environment variable and then parses it as JSON into the T type
 func env[T any](key string, def T) (out T) {
 	e := os.Getenv(key)
 	if len(e) == 0 {

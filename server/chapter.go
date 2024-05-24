@@ -43,11 +43,15 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 
 	slog.DebugContext(r.Context(), "MangaDex Chapter URL", "url", mdUrl)
 
+	var id string
+
 	// The ID is either its own param or a submatch of the regex
-	id := cmp.Or(
-		r.URL.Query().Get("id"),
-		shared.Second(mdRe.FindStringSubmatch(mdUrl)),
-	)
+	matches := mdRe.FindStringSubmatch(mdUrl)
+	if len(matches) > 1 {
+		id = matches[1]
+	} else {
+		id = r.URL.Query().Get("id")
+	}
 
 	slog.InfoContext(r.Context(), "manual chapter download", "id", id)
 
@@ -72,7 +76,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
 }
 
-// Implement support for OPDS-PSE 1.0
+// imageHandler implements support for OPDS-PSE 1.0
 // https://github.com/anansi-project/opds-pse/blob/master/v1.0.md
 func imageHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(r.PathValue("id"))
@@ -172,6 +176,8 @@ func cbzHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// coversHandler is used to work around a bug in some OPDS clients
+// where they request the cover from this proxy server instead of MangaDex.
 func coversHandler(w http.ResponseWriter, r *http.Request) {
 	coverUrl := shared.UploadsURL
 	coverUrl.Path = r.URL.Path

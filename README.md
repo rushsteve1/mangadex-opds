@@ -28,7 +28,7 @@ We want to be respectful of MangaDex and their
 - [ATOM](https://validator.w3.org/feed/docs/atom.html)
 - [OPDS-PSE](https://anansi-project.github.io/docs/opds-pse/specs/v1.0)
 - [EPUB](https://www.w3.org/TR/epub-33/)
-- [ComicInfo.xml](hhttps://anansi-project.github.io/docs/comicinfo/documentation)
+- [ComicInfo.xml](https://anansi-project.github.io/docs/comicinfo/documentation)
 
 ## Thanks
 
@@ -43,5 +43,5 @@ mangadex-opds is licensed under the terms of the [AGPL license](./LICENSE.txt)
 
 ## Donations
 
-This project does not take donations, please
+This project does not take donations please
 [donate to MangaDex instead](https://namicomi.com/en/org/3Hb7HnWG/mangadex/subscriptions)

@@ -11,14 +11,18 @@ import (
 	"github.com/rushsteve1/mangadex-opds/shared"
 )
 
+// Chapter is a single chapter on MangaDex.
+// Use [FetchChapter] to get one from the API.
 type Chapter struct {
 	ID            uuid.UUID         `json:"id"`
 	Attributes    ChapterAttributes `json:"attributes"`
 	Relationships []Relationship    `json:"relationships"`
+	fullTitle     string
 	manga         *Manga
 	imgUrls       []*url.URL
 }
 
+// ChapterAttributes are all the field attributes for a chapter.
 type ChapterAttributes struct {
 	Title              string    `json:"title"`
 	Volume             string    `json:"volume"`
@@ -35,7 +39,14 @@ func (c Chapter) URL() string {
 	return u.String()
 }
 
-func (c Chapter) FullTitle() string {
+// FullTitle builds and returns the full title of the chapter including
+// the manga name, volume number, chapter number, and chapter title.
+// This value is cached on the [Chapter] struct.
+func (c *Chapter) FullTitle() string {
+	if len(c.fullTitle) > 0 {
+		return c.fullTitle
+	}
+
 	builder := strings.Builder{}
 
 	m := c.Manga()
@@ -63,11 +74,13 @@ func (c Chapter) FullTitle() string {
 		builder.WriteString(c.Attributes.Title)
 	}
 
-	return strings.TrimSpace(builder.String())
+	c.fullTitle = strings.TrimSpace(builder.String())
+	return c.fullTitle
 }
 
+// Manga finds and casts the [Manga] that this [Chapter] belongs to.
+// This value is cached on the [Chapter] struct.
 func (c *Chapter) Manga() *Manga {
-	// Cache the cast manga so that we don't have to do it again
 	if c.manga != nil {
 		return c.manga
 	}
@@ -81,7 +94,7 @@ func (c *Chapter) Manga() *Manga {
 			}
 
 			c.manga = &m
-			return &m
+			return c.manga
 		}
 	}
 

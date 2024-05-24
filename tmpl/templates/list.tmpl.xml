@@ -23,7 +23,7 @@
 
         <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="subsection" href="{{ .URL }}" />
 
-    {{ with .GetRelData }}
+    {{ with .RelData }}
     {{ range .Authors }}
         <author>
             <name>{{ .Name }}</name>

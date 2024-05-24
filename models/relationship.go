@@ -10,6 +10,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// Relationship represents a relation between one MangaDex data entity and another.
 type Relationship struct {
 	ID         string         `json:"id"`
 	Type       string         `json:"type"`
@@ -22,6 +23,10 @@ func (r Relationship) URL() url.URL {
 	return relUrl
 }
 
+// CastRelationship is a special helper function that uses JSON marshaling to
+// transform a [Relationship]'s attributes into another type.
+//
+// This function should be used with care.
 func CastRelationship[T any](rel *Relationship) (out T, err error) {
 	r, w := io.Pipe()
 

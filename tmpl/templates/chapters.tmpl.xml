@@ -21,7 +21,7 @@
     <content type="text">{{ html .Manga.TrDesc }}</content>
     */}}
 
-    {{- $reldata := .Manga.GetRelData -}}
+    {{- $reldata := .Manga.RelData -}}
 
     {{ range .Chapters }}
     <entry>

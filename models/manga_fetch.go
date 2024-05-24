@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// Fetch gets the manga series information the MangaDex API and returns the [Manga].
 func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Manga, err error) {
 	slog.InfoContext(ctx, "fetching manga", "id", id)
 
@@ -23,12 +24,13 @@ func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Ma
 	data, err := shared.QueryAPI[Data[Manga]](ctx, queryPath, queryParams)
 
 	m = data.Data
-	m.MergeTitles()
+	m.mergeTitles()
 
 	return m, err
 }
 
-func Search(ctx context.Context, queryParams url.Values) (ms []Manga, err error) {
+// SearchManga queries the MangaDex search endpoint and returns an array of [Manga].
+func SearchManga(ctx context.Context, queryParams url.Values) (ms []Manga, err error) {
 	queryParams = shared.WithDefaultParams(queryParams)
 
 	data, err := shared.QueryAPI[Data[[]Manga]](ctx, "manga", queryParams)
@@ -36,6 +38,10 @@ func Search(ctx context.Context, queryParams url.Values) (ms []Manga, err error)
 	return data.Data, err
 }
 
+// Feed returns the chapter feed for a series as an array of [Chapter].
+// By default the it filters to the current language in [shared.GlobalOptions]
+// and sorts the chapters in ascending order, filtering out empty chapters.
+// This can be changed using the queryParams.
 func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []Chapter, err error) {
 	queryPath, err := url.JoinPath("manga", m.ID.String(), "feed")
 	if err != nil {
@@ -46,9 +52,9 @@ func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []Chapter, 
 		queryParams = url.Values{}
 	}
 
-	queryParams.Set("order[chapter]", "asc")
-	queryParams.Set("translatedLanguage[]", shared.GlobalOptions.Language)
-	queryParams.Set("includeEmptyPages", "0")
+	queryParams.Add("order[chapter]", "asc")
+	queryParams.Add("translatedLanguage[]", shared.GlobalOptions.Language)
+	queryParams.Add("includeEmptyPages", "0")
 
 	data, err := shared.QueryAPI[Data[[]Chapter]](ctx, queryPath, queryParams)
 

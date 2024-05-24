@@ -5,19 +5,14 @@ import (
 	"testing"
 )
 
+// Tr takes a map of translation strings and returns the one matching the language
+// in [GlobalOptions] OR the special `ja-ro` translation OR the fallback string "Unknown".
 func Tr(m map[string]string) string {
 	// ja-ro is a special locale that MangaDex uses which should always exist
 	return cmp.Or(m[GlobalOptions.Language], m["ja-ro"], "Unknown")
 }
 
-func Second[T any](ar []T) (out T) {
-	if len(ar) == 1 {
-		return out
-	}
-
-	return ar[1]
-}
-
+// AssertEq asserts that two values are equal in a test, logging if they are not.
 func AssertEq[T comparable](t *testing.T, actual, expected T) bool {
 	if actual != expected {
 		t.Errorf(
@@ -30,6 +25,7 @@ func AssertEq[T comparable](t *testing.T, actual, expected T) bool {
 	return true
 }
 
+// AssertEq asserts that two values are NOT equal in a test, logging if they are.
 func AssertNeq[T comparable](t *testing.T, actual, unexpected T) bool {
 	if actual == unexpected {
 		t.Errorf(

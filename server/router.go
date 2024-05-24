@@ -29,6 +29,8 @@ func init() {
 	}))
 }
 
+// Router is the primary HTTP router for the server.
+// It does NOT use the default global router from the http module.
 func Router() *http.ServeMux {
 	mux := http.NewServeMux()
 
@@ -76,6 +78,7 @@ func Router() *http.ServeMux {
 	return outerMux
 }
 
+// indexHandler returns the (semi) static index page
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// This is the 404 handler
 	if r.URL.Path != "/" {
@@ -90,6 +93,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// httpError is a helper function that logs and then responds with an HTTP server error
 func httpError(w http.ResponseWriter, r *http.Request, err error) {
 	slog.ErrorContext(
 		r.Context(),

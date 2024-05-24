@@ -24,7 +24,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Otherwise return the OPDS XML list for the search
-	resp, err := models.Search(r.Context(), r.URL.Query())
+	resp, err := models.SearchManga(r.Context(), r.URL.Query())
 	if err != nil {
 		httpError(w, r, err)
 		return

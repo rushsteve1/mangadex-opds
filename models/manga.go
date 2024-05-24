@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// Manga is a single manga/comic series on MangaDex.
+// Use [FetchManga] to get one from the API.
 type Manga struct {
 	ID            uuid.UUID       `json:"id"`
 	Attributes    MangaAttributes `json:"attributes"`
@@ -17,6 +19,7 @@ type Manga struct {
 	relData       *RelData
 }
 
+// MangaAttributes are all the field attributes for a manga.
 type MangaAttributes struct {
 	Title            map[string]string   `json:"title"`
 	AltTitles        []map[string]string `json:"altTitles"`
@@ -34,7 +37,7 @@ func (m Manga) URL() string {
 	return u.String()
 }
 
-func (m *Manga) MergeTitles() {
+func (m *Manga) mergeTitles() {
 	for _, at := range m.Attributes.AltTitles {
 		for k, v := range at {
 			_, found := m.Attributes.Title[k]
@@ -45,25 +48,31 @@ func (m *Manga) MergeTitles() {
 	}
 }
 
+// TrTitle returns the [Manga]'s title translated using [shared.Tr].
 func (m Manga) TrTitle() string {
 	return shared.Tr(m.Attributes.Title)
 }
 
+// TrDesc retuns the [Manga]'s description translated using [shared.Tr]
 func (m Manga) TrDesc() string {
 	return shared.Tr(m.Attributes.Description)
 }
 
+// RelData is the parsed [Relationship] data for a [Manga].
 type RelData struct {
 	Authors  []Author
 	CoverURL string
 }
 
+// Author is a single author/artist for a [Manga],
+// of which there may be several.
 type Author struct {
 	Name string
 	URI  string
 }
 
 func parseAuthor(m map[string]any) (a Author) {
+	// MangaDex exposes a variety of options for this
 	ustr := cmp.Or(m["website"], m["twitter"], m["youtube"], m["tumblr"], m["pixiv"])
 	s, ok := ustr.(string)
 	if ok {
@@ -81,9 +90,11 @@ func parseAuthor(m map[string]any) (a Author) {
 	return a
 }
 
-func (m *Manga) GetRelData() (rd RelData) {
+// RelData returns the [RelData] for this manga.
+// This value is cached on the [Manga] struct.
+func (m *Manga) RelData() (rd *RelData) {
 	if m.relData != nil {
-		return *m.relData
+		return m.relData
 	}
 
 	for _, rel := range m.Relationships {
@@ -103,6 +114,6 @@ func (m *Manga) GetRelData() (rd RelData) {
 		}
 	}
 
-	m.relData = &rd
-	return rd
+	m.relData = rd
+	return m.relData
 }

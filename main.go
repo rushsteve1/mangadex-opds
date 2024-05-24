@@ -10,9 +10,8 @@ import (
 )
 
 func main() {
+	// This sets the shared.GlobalOptions variable
 	shared.ReadOptionsFromEnv()
-
-	slog.SetLogLoggerLevel(shared.GlobalOptions.LogLevel)
 
 	srv := http.Server{
 		Addr:              shared.GlobalOptions.Bind,
