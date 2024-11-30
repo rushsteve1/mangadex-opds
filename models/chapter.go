@@ -33,7 +33,7 @@ type ChapterAttributes struct {
 	UpdatedAt          time.Time `json:"updatedAt"`
 }
 
-func (c Chapter) URL() string {
+func (c *Chapter) URL() string {
 	u := shared.GlobalOptions.Host
 	u.Path, _ = url.JoinPath("chapter", c.ID.String())
 	return u.String()
