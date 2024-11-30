@@ -50,5 +50,8 @@ func mangaHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.MangaChapterFeed(r.Context(), w, &m, r.URL.Query())
+	err = tmpl.MangaChapterFeed(r.Context(), w, &m, r.URL.Query())
+	if err != nil {
+		httpError(w, r, err)
+	}
 }
