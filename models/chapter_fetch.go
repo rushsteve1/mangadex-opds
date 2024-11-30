@@ -39,7 +39,7 @@ func FetchChapter(
 		queryParams[k] = v
 	}
 
-	data, err := shared.QueryAPI[Data[Chapter]](ctx, queryPath, queryParams)
+	data, err := shared.QueryAPI[Data[Chapter]](ctx, queryPath, queryParams, nil)
 
 	return data.Data, err
 }
@@ -74,7 +74,7 @@ func (c *Chapter) FetchImageURLs(ctx context.Context) (imgUrls []*url.URL, err e
 		return nil, err
 	}
 
-	resp, err := shared.QueryAPI[imageUrlResponse](ctx, queryPath, nil)
+	resp, err := shared.QueryAPI[imageUrlResponse](ctx, queryPath, nil, nil)
 	if err != nil {
 		return nil, err
 	}

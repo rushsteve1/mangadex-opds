@@ -20,7 +20,7 @@ func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Ma
 
 	queryParams = shared.WithDefaultParams(queryParams)
 
-	data, err := shared.QueryAPI[Data[Manga]](ctx, queryPath, queryParams)
+	data, err := shared.QueryAPI[Data[Manga]](ctx, queryPath, queryParams, nil)
 
 	m = data.Data
 	m.mergeTitles()
@@ -32,7 +32,7 @@ func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Ma
 func SearchManga(ctx context.Context, queryParams url.Values) (ms []Manga, err error) {
 	queryParams = shared.WithDefaultParams(queryParams)
 
-	data, err := shared.QueryAPI[Data[[]Manga]](ctx, "manga", queryParams)
+	data, err := shared.QueryAPI[Data[[]Manga]](ctx, "manga", queryParams, nil)
 
 	return data.Data, err
 }
@@ -55,7 +55,7 @@ func (m *Manga) Feed(ctx context.Context, queryParams url.Values) (cs []Chapter,
 	queryParams.Add("translatedLanguage[]", shared.GlobalOptions.Language)
 	queryParams.Add("includeEmptyPages", "0")
 
-	data, err := shared.QueryAPI[Data[[]Chapter]](ctx, queryPath, queryParams)
+	data, err := shared.QueryAPI[Data[[]Chapter]](ctx, queryPath, queryParams, nil)
 
 	return data.Data, err
 }

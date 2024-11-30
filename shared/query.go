@@ -1,9 +1,11 @@
 package shared
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/time/rate"
 	"io"
 	"log/slog"
 	"mime"
@@ -11,6 +13,7 @@ import (
 	"net/url"
 	"path"
 	"runtime/debug"
+	"time"
 )
 
 // APIUrl is the default MangaDex API URL
@@ -45,11 +48,15 @@ func UserAgent() string {
 	return fmt.Sprintf("%s/%s", path.Base(info.Main.Path), info.Main.Version)
 }
 
+// QueryAPILimiter limits the rate that QueryAPI is called
+var QueryAPILimiter = rate.NewLimiter(rate.Every(time.Second)/5, 5)
+
 // QueryAPI is used to fetch data from the MangaDex API.
 func QueryAPI[T any](
 	ctx context.Context,
 	queryPath string,
 	queryParams url.Values,
+	limiter *rate.Limiter,
 ) (out T, err error) {
 	var queryUrl url.URL
 	if GlobalOptions.DevApi {
@@ -61,59 +68,107 @@ func QueryAPI[T any](
 	queryUrl.Path = queryPath
 	queryUrl.RawQuery = queryParams.Encode()
 
-	slog.InfoContext(ctx, "querying API", "url", queryUrl.String())
+	var entry []byte
 
-	req, err := makeRequest(ctx, &queryUrl)
+	for i := 0; i < 3 && err != nil; i++ {
+		err = QueryAPILimiter.Wait(ctx)
+		if err != nil {
+			continue
+		}
+		if limiter != nil {
+			err = limiter.Wait(ctx)
+			if err != nil {
+				continue
+			}
+		}
+
+		slog.InfoContext(ctx, "querying API", "url", queryUrl.String())
+
+		req, err2 := makeRequest(ctx, &queryUrl)
+		if err2 != nil {
+			err2 = err
+			continue
+		}
+		req.Header.Set("Accept", "application/json")
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			err2 = err
+			continue
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusOK {
+			err = fmt.Errorf("upstream error: %s", res.Status)
+			time.After(1 * time.Minute)
+			continue
+		}
+
+		entry, err = io.ReadAll(res.Body)
+		if err == nil {
+			break
+		}
+	}
 	if err != nil {
 		return out, err
 	}
-	req.Header.Set("Accept", "application/json")
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return out, err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return out, fmt.Errorf("upstream error: %s", res.Status)
-	}
-
-	err = json.NewDecoder(res.Body).Decode(&out)
-
+	err = json.NewDecoder(bytes.NewReader(entry)).Decode(&out)
 	return out, err
 }
 
+// QueryImageLimiter limits the rate that QueryImage is called
+var QueryImageLimiter = rate.NewLimiter(rate.Every(time.Second)/5, 5)
+
 // QueryImage is used to fetch an image from the given URL.
 // Only PNG and JPG images are supported, for compatibility with downstream CBZ and EPUB formats.
-func QueryImage(ctx context.Context, imgUrl *url.URL, w io.Writer) (err error) {
+func QueryImage(
+	ctx context.Context,
+	imgUrl *url.URL,
+	w io.Writer,
+	limiter *rate.Limiter,
+) (err error) {
 	// In some tests we do not actually want to download the files
 	if GlobalOptions.NoDownload {
 		slog.Warn("no-download option enabled", "url", imgUrl.String())
 		return nil
 	}
 
-	slog.InfoContext(ctx, "querying image", "url", imgUrl.String())
+	for i := 0; i < 3 && err != nil; i++ {
+		err = QueryImageLimiter.Wait(ctx)
+		if err != nil {
+			continue
+		}
+		if limiter != nil {
+			err = limiter.Wait(ctx)
+			if err != nil {
+				continue
+			}
+		}
+		slog.InfoContext(ctx, "querying image", "url", imgUrl.String())
 
-	req, err := makeRequest(ctx, imgUrl)
-	if err != nil {
-		return err
+		req, err := makeRequest(ctx, imgUrl)
+		if err != nil {
+			return err
+		}
+
+		req.Header.Add("Accept", mime.TypeByExtension(".png"))
+		req.Header.Add("Accept", mime.TypeByExtension(".jpg"))
+
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusOK {
+			return fmt.Errorf("upstream error: %s", res.Status)
+		}
+
+		_, err = io.Copy(w, res.Body)
+		if err == nil {
+			break
+		}
 	}
-
-	req.Header.Add("Accept", mime.TypeByExtension(".png"))
-	req.Header.Add("Accept", mime.TypeByExtension(".jpg"))
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("upstream error: %s", res.Status)
-	}
-
-	_, err = io.Copy(w, res.Body)
 
 	slog.DebugContext(ctx, "finished image download", "url", imgUrl)
 
