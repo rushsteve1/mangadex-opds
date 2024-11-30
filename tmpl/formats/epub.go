@@ -70,7 +70,7 @@ func WriteEpub(ctx context.Context, c *models.Chapter, w io.Writer) (err error) 
 					Index: i,
 				}
 
-				err := shared.QueryImage(ctx, img, &chImg.Data)
+				err := shared.QueryImage(ctx, img, &chImg.Data, nil)
 				if err != nil {
 					return err
 				}
