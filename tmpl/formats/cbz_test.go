@@ -7,12 +7,13 @@ import (
 
 	"github.com/rushsteve1/mangadex-opds/models"
 	"github.com/rushsteve1/mangadex-opds/shared"
-	
+
 	"github.com/google/uuid"
 )
 
 // Girl's Last Tour chapter 43 uploaded by rozen
 const ChapterID = "9a612118-1441-431a-979d-85958fb20cf2"
+
 // We use size to check validity because we can't use hashes due to ModTime
 // and it is extremely unlikely that an invalid zip would have exactly the right size
 const ChapterSize = 1_173_541
