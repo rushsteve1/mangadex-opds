@@ -22,9 +22,13 @@ func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Ma
 	queryParams = shared.WithDefaultParams(queryParams)
 
 	data, err := shared.QueryAPI[Data[Manga]](ctx, queryPath, queryParams)
+	if err != nil {
+		return m, err
+	}
 
 	m = data.Data
 	m.mergeTitles()
+	m.RelData()
 
 	return m, err
 }
@@ -34,6 +38,13 @@ func SearchManga(ctx context.Context, queryParams url.Values) (ms []Manga, err e
 	queryParams = shared.WithDefaultParams(queryParams)
 
 	data, err := shared.QueryAPI[Data[[]Manga]](ctx, "manga", queryParams)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range data.Data {
+		data.Data[i].RelData()
+	}
 
 	return data.Data, err
 }
@@ -42,7 +53,7 @@ func SearchManga(ctx context.Context, queryParams url.Values) (ms []Manga, err e
 // By default the it filters to the current language in [shared.GlobalOptions]
 // and sorts the chapters in ascending order, filtering out empty chapters.
 // This can be changed using the queryParams.
-func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []Chapter, err error) {
+func (m *Manga) Feed(ctx context.Context, queryParams url.Values) (cs []Chapter, err error) {
 	queryPath, err := url.JoinPath("manga", m.ID.String(), "feed")
 	if err != nil {
 		return nil, err
@@ -57,6 +68,11 @@ func (m Manga) Feed(ctx context.Context, queryParams url.Values) (cs []Chapter, 
 	queryParams.Add("includeEmptyPages", "0")
 
 	data, err := shared.QueryAPI[Data[[]Chapter]](ctx, queryPath, queryParams)
+
+	for i := range data.Data {
+		data.Data[i].manga = m
+		data.Data[i].FullTitle()
+	}
 
 	return data.Data, err
 }

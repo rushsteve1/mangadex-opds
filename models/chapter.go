@@ -92,6 +92,7 @@ func (c *Chapter) Manga() *Manga {
 				slog.Error("error casting to manga", "error", err)
 				return nil
 			}
+			m.RelData()
 
 			c.manga = &m
 			return c.manga
