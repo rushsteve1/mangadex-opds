@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>{{ .ID }}</id>
+    <id>{{ html .ID }}</id>
 
-    <title>{{ .Title }}</title>
-    <updated>{{ .UpdatedAt }}</updated>
+    <title>{{ html .Title }}</title>
+    <updated>{{ html .UpdatedAt }}</updated>
     <author>
-        <name>mangadex-opds {{ .Version }}</name>
+        <name>mangadex-opds {{ html .Version }}</name>
         <uri>https://github.com/rushsteve1/mangadex-opds</uri>
     </author>
 
-    <link rel="self" href="{{ .Self }}" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-    <link rel="start" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-    <link rel="up" href="{{ .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-    <link rel="search" href="{{ .Host }}/search" type="application/opensearchdescription+xml"/>
+    <link rel="self" href="{{ html .Self }}" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="start" href="{{ html .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="up" href="{{ html .Host }}/root" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="search" href="{{ html .Host }}/search" type="application/opensearchdescription+xml"/>
 
     {{ range .MangaList }}
     <entry>
-        <title>{{ .TrTitle }}</title>
-        <id>{{ .ID }}</id>
+        <title>{{ html .TrTitle }}</title>
+        <id>{{ html .ID }}</id>
         <content type="text">{{ html .TrDesc }}</content>
         <updated>{{ datef .Attributes.UpdatedAt }}</updated>
 
-        <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="subsection" href="{{ .URL }}" />
+        <link type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="subsection" href="{{ html .URL }}" />
 
     {{ with .RelData }}
     {{ range .Authors }}
         <author>
-            <name>{{ .Name }}</name>
+            <name>{{ html .Name }}</name>
         {{ if ne .URI nil }}
             <uri>{{ html .URI }}</uri>
         {{ end }}
         </author>
     {{ end }}
 
-        <link href="{{ .CoverURL }}" rel="http://opds-spec.org/image" type="{{ mime .CoverURL }}" />
-        <link href="{{printf "%s.256.jpg" .CoverURL }}" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail" />
-    {{end}}
+        <link href="{{ html .CoverURL }}" rel="http://opds-spec.org/image" type="{{ mime .CoverURL }}" />
+        <link href="{{ html .CoverURL }}.256.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail" />
+    {{ end }}
     </entry>
     {{ end }}
 </feed>

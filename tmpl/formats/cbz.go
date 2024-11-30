@@ -2,7 +2,6 @@ package formats
 
 import (
 	"archive/zip"
-	"bytes"
 	"context"
 	"io"
 	"log/slog"
@@ -14,12 +13,6 @@ import (
 
 	"golang.org/x/sync/errgroup"
 )
-
-type chapterImage struct {
-	Index int
-	Name  string
-	Data  bytes.Buffer
-}
 
 // WriteCBZ is where everything comes together and writes a CBZ file for a [Chapter]
 // using the following steps
@@ -52,7 +45,7 @@ func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 		return err
 	}
 
-	imgChan := make(chan chapterImage)
+	imgChan := make(chan tmpl.ChapterImage)
 	doneChan := make(chan error)
 
 	// Fetch and add the image files in parallel
@@ -63,7 +56,7 @@ func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 		for _, img := range imgUrls {
 			eg.Go(func() error {
 				imgName := path.Base(img.String())
-				chImg := chapterImage{Name: imgName}
+				chImg := tmpl.ChapterImage{Name: imgName}
 
 				err := shared.QueryImage(ctx, img, &chImg.Data)
 				if err != nil {
@@ -93,7 +86,10 @@ func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 			return err
 		}
 
-		io.Copy(w, &img.Data)
+		_, err = io.Copy(w, &img.Data)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = <-doneChan

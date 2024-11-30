@@ -1,6 +1,5 @@
 package formats
 
-/* TODO
 import (
 	"context"
 	"os"
@@ -36,4 +35,3 @@ func Test_WriteEpub(t *testing.T) {
 		t.Fatal("size zero")
 	}
 }
-*/
