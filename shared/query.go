@@ -35,6 +35,8 @@ var UploadsURL = url.URL{
 	Host:   "uploads.mangadex.org",
 }
 
+
+// cache holds cached responses for image and API requests
 var cache, _ = bigcache.New(context.Background(), bigcache.Config{
 	// number of shards (must be a power of 2)
 	Shards: 1024,
