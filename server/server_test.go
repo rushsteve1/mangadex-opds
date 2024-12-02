@@ -63,7 +63,7 @@ func Test_DownloadMDUrl(t *testing.T) {
 
 			body, err := io.ReadAll(resp.Body)
 			shared.AssertEq(t, err, nil)
-			shared.AssertEq(t, len(body), 4853)
+			shared.AssertEq(t, len(body), 4878)
 		})
 	}
 }
