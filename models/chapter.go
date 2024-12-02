@@ -87,14 +87,16 @@ func (c *Chapter) Manga() *Manga {
 
 	for _, rel := range c.Relationships {
 		if rel.Type == "manga" {
-			m, err := CastRelationship[Manga](&rel)
+			c.manga = &Manga{}
+			a, err := CastRelationship[MangaAttributes](&rel)
 			if err != nil {
 				slog.Error("error casting to manga", "error", err)
 				return nil
 			}
-			m.RelData()
+			c.manga.ID = uuid.MustParse(rel.ID)
+			c.manga.Attributes = a
+			c.manga.RelData()
 
-			c.manga = &m
 			return c.manga
 		}
 	}

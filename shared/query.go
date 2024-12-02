@@ -115,7 +115,14 @@ func QueryAPI[T any](
 	if err == nil {
 		slog.InfoContext(ctx, "loading cache of API", "url", queryUrl.String())
 	} else {
-		for i := 0; i < 3 && err != nil; i++ {
+		var req *http.Request
+		var res *http.Response
+
+		for i := 0; i < 3; i++ {
+			if res != nil {
+				_ = res.Body.Close()
+			}
+
 			err = QueryAPILimiter.Wait(ctx)
 			if err != nil {
 				continue
@@ -126,33 +133,32 @@ func QueryAPI[T any](
 					continue
 				}
 			}
-			req, err := makeRequest(ctx, &queryUrl)
+
+			req, err = makeRequest(ctx, &queryUrl)
 			if err != nil {
-				return out, err
+				continue
 			}
+
 			req.Header.Set("Accept", "application/json")
 
-			res, err := http.DefaultClient.Do(req)
+			res, err = http.DefaultClient.Do(req)
 			if err != nil {
-				return out, err
+				continue
 			}
-			defer res.Body.Close()
 
 			slog.InfoContext(ctx, "querying API", "url", queryUrl.String())
 
-			req, err2 := makeRequest(ctx, &queryUrl)
-			if err2 != nil {
-				err2 = err
+			req, err = makeRequest(ctx, &queryUrl)
+			if err != nil {
 				continue
 			}
 			req.Header.Set("Accept", "application/json")
 
-			res, err3 := http.DefaultClient.Do(req)
-			if err3 != nil {
-				err3 = err
+			res, err = http.DefaultClient.Do(req)
+			if err != nil {
+				res = nil
 				continue
 			}
-			defer res.Body.Close()
 
 			if res.StatusCode != http.StatusOK {
 				err = fmt.Errorf("upstream error: %s", res.Status)
@@ -166,9 +172,15 @@ func QueryAPI[T any](
 			}
 
 			err = cache.Set(queryUrl.String(), entry)
-			if err == nil {
-				break
+			if err != nil {
+				continue
 			}
+
+			break
+		}
+
+		if res != nil {
+			_ = res.Body.Close()
 		}
 	}
 
@@ -193,55 +205,71 @@ func QueryImage(
 		return nil
 	}
 
-	for i := 0; i < 3 && err != nil; i++ {
-		err = QueryImageLimiter.Wait(ctx)
-		if err != nil {
-			continue
-		}
-		if limiter != nil {
-			err = limiter.Wait(ctx)
+	slog.InfoContext(ctx, "querying image", "url", imgUrl.String())
+
+	entry, err := cache.Get(imgUrl.String())
+
+	if err == nil {
+		slog.InfoContext(ctx, "loading cache of image", "url", imgUrl.String())
+	} else {
+		var req *http.Request
+		var res *http.Response
+
+		for i := 0; i < 3; i++ {
+			if res != nil {
+				_ = res.Body.Close()
+			}
+
+			err = QueryImageLimiter.Wait(ctx)
 			if err != nil {
 				continue
 			}
-		}
-		slog.InfoContext(ctx, "querying image", "url", imgUrl.String())
+			if limiter != nil {
+				err = limiter.Wait(ctx)
+				if err != nil {
+					continue
+				}
+			}
 
-		entry, err := cache.Get(imgUrl.String())
-		if err == nil {
-			slog.InfoContext(ctx, "loading cache of image", "url", imgUrl.String())
-			_, err = w.Write(entry)
-		} else {
-			req, err := makeRequest(ctx, imgUrl)
+			req, err = makeRequest(ctx, imgUrl)
 			if err != nil {
-				return err
+				continue
 			}
 
 			req.Header.Add("Accept", mime.TypeByExtension(".png"))
 			req.Header.Add("Accept", mime.TypeByExtension(".jpg"))
 
-			res, err := http.DefaultClient.Do(req)
+			res, err = http.DefaultClient.Do(req)
 			if err != nil {
-				return err
+				res = nil
+				continue
 			}
-			defer res.Body.Close()
 
 			if res.StatusCode != http.StatusOK {
 				return fmt.Errorf("upstream error: %s", res.Status)
 			}
 
+			entry, err = io.ReadAll(res.Body)
+			if err != nil {
+				continue
+			}
+
 			err = cache.Set(imgUrl.String(), entry)
 			if err != nil {
-				return err
+				_ = res.Body.Close()
+				continue
 			}
 
-			_, err = w.Write(entry)
-			if err == nil {
-				break
-			}
+			slog.DebugContext(ctx, "finished image download", "url", imgUrl)
+			break
 		}
 
-		slog.DebugContext(ctx, "finished image download", "url", imgUrl)
+		if res != nil {
+			_ = res.Body.Close()
+		}
 	}
+
+	_, err = w.Write(entry)
 
 	return err
 }
