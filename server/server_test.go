@@ -62,6 +62,7 @@ func Test_DownloadMDUrl(t *testing.T) {
 			shared.AssertEq(t, resp.StatusCode, http.StatusOK)
 
 			body, err := io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
 			shared.AssertEq(t, err, nil)
 			shared.AssertEq(t, len(body), 4878)
 		})
