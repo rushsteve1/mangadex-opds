@@ -3,34 +3,35 @@
     <id>root</id>
 
     <title>MangaDex OPDS Catalog</title>
-    <updated>{{ .UpdatedAt }}</updated>
+    <updated>{{ html .UpdatedAt }}</updated>
     <author>
-        <name>mangadex-opds {{ .Version }}</name>
+        <name>mangadex-opds {{ html .Version }}</name>
         <uri>https://github.com/rushsteve1/mangadex-opds</uri>
     </author>
 
-    <link rel="self" href="{{ .Host }}/catalog" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-    <link rel="start" href="{{ .Host }}/catalog" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-    <link rel="search" href="{{ .Host }}/search" type="application/opensearchdescription+xml"/>
+    <link rel="self" href="{{ html .Host }}/catalog" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="start" href="{{ html .Host }}/catalog" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="search" href="{{ html .Host }}/search" type="application/opensearchdescription+xml"/>
+    <link rel="search" href="{{ html .Host }}/search?title={searchTerms}" type="application/atom+xml" title="MangaDex OPDS"/>
 
     <entry>
         <title>Most Followed</title>
-        <link rel="subsection" href="{{ .Host }}/catalog/popular" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-        <updated>{{ .UpdatedAt }}</updated>
+        <link rel="subsection" href="{{ html .Host }}/catalog/popular" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+        <updated>{{ html .UpdatedAt }}</updated>
         <id>popular</id>
         <content type="text">Most Followed manga on MangaDex.</content>
     </entry>
     <entry>
         <title>New Arrivals</title>
-        <link rel="subsection" href="{{ .Host }}/catalog/new" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-        <updated>{{ .UpdatedAt }}</updated>
+        <link rel="subsection" href="{{ html .Host }}/catalog/new" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+        <updated>{{ html .UpdatedAt }}</updated>
         <id>new</id>
         <content type="text">Newly Arrived manga on MangaDex.</content>
     </entry>
     <entry>
         <title>New Chapters</title>
-        <link rel="subsection" href="{{ .Host }}/catalog/updated" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
-        <updated>{{ .UpdatedAt }}</updated>
+        <link rel="subsection" href="{{ html .Host }}/catalog/updated" type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+        <updated>{{ html .UpdatedAt }}</updated>
         <id>updated</id>
         <content type="text">Manga with New Chapters on MangaDex.</content>
     </entry>

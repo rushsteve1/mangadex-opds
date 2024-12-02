@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="uuid_id">
+  <metadata xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:calibre="http://calibre.kovidgoyal.net/2009/metadata">
+    <dc:language>{{ html .Attributes.TranslatedLanguage }}</dc:language>
+    <dc:title>{{ html .FullTitle }}</dc:title>
+    <dc:identifier id="uuid_id" opf:scheme="uuid">{{ html .ID }}</dc:identifier>
+    {{ range .Manga.RelData.Authors }}
+    <dc:creator>{{ html .Name }}</dc:creator>
+    {{ end }}
+  </metadata>
+  <manifest>
+    {{ range $index, $url := .ImgURLs }}
+    <item id="{{ base $url.Path | id }}" href="{{ base $url.Path }}" media-type="{{ mime $url.Path }}"/>
+    <item id="{{ base $url.Path | id }}_xhtml" href="{{ base $url.Path }}" media-type="application/xhtml+xml"/>
+    {{ end }}
+    <item id="page_css" href="page_styles.css" media-type="text/css"/>
+    <item id="css" href="stylesheet.css" media-type="text/css"/>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    {{ range $index, $url := .ImgURLs }}
+    <itemref idref="{{ base $url.Path | id }}_xhtml"/>
+    {{ end }}
+  </spine>
+</package>

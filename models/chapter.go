@@ -33,7 +33,7 @@ type ChapterAttributes struct {
 	UpdatedAt          time.Time `json:"updatedAt"`
 }
 
-func (c Chapter) URL() string {
+func (c *Chapter) URL() string {
 	u := shared.GlobalOptions.Host
 	u.Path, _ = url.JoinPath("chapter", c.ID.String())
 	return u.String()
@@ -87,16 +87,23 @@ func (c *Chapter) Manga() *Manga {
 
 	for _, rel := range c.Relationships {
 		if rel.Type == "manga" {
-			m, err := CastRelationship[Manga](&rel)
+			c.manga = &Manga{}
+			a, err := CastRelationship[MangaAttributes](&rel)
 			if err != nil {
 				slog.Error("error casting to manga", "error", err)
 				return nil
 			}
+			c.manga.ID = uuid.MustParse(rel.ID)
+			c.manga.Attributes = a
+			c.manga.RelData()
 
-			c.manga = &m
 			return c.manga
 		}
 	}
 
 	return nil
+}
+
+func (c *Chapter) ImgURLs() []*url.URL {
+	return c.imgUrls
 }

@@ -106,7 +106,7 @@ func TestOptions() {
 		Host:      defaultBind,
 		Language:  "en",
 		DataSaver: true,
-		DevApi:    true,
+		DevApi:    false,
 		ExpVars:   true,
 		LogLevel:  slog.LevelDebug,
 	}
@@ -135,7 +135,12 @@ func loadDotEnv() {
 			continue
 		}
 
-		os.Setenv(strings.TrimSpace(key), strings.TrimSpace(val))
+		key = strings.TrimSpace(key)
+		val = strings.TrimSpace(val)
+		err := os.Setenv(key, val)
+		if err != nil {
+			slog.Warn("setting environment variable failed", key, val)
+		}
 	}
 }
 

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ComicInfo>
-    <Title>{{ .FullTitle }}</Title>
-    <Series>{{ .Manga.TrTitle }}</Series>
-    <Number>{{ .Attributes.Chapter }}</Number>
-    <Volume>{{ .Attributes.Volume }}</Volume>
-    <PageCount>{{ .Attributes.Pages }}</PageCount>
-    <Genre>{{ .Manga.Attributes.Demographic }}</Genre>
-    <LanguageISO>{{ .Attributes.TranslatedLanguage }}</LanguageISO>
+    <Title>{{ html .FullTitle }}</Title>
+    <Series>{{ html .Manga.TrTitle }}</Series>
+    <Number>{{ html .Attributes.Chapter }}</Number>
+    <Volume>{{ html .Attributes.Volume }}</Volume>
+    <PageCount>{{ html .Attributes.Pages }}</PageCount>
+    <Genre>{{ html .Manga.Attributes.Demographic }}</Genre>
+    <LanguageISO>{{ html .Attributes.TranslatedLanguage }}</LanguageISO>
     <Manga>YesAndRightToLeft</Manga>
 </ComicInfo>

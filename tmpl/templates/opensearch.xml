@@ -2,5 +2,6 @@
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
     <ShortName>MangaDex OPDS</ShortName>
     <Description>Search manga by title on MangaDex</Description>
+    <Url type="application/atom+xml" template="/search?title={searchTerms}" />
     <Url type="application/atom+xml;profile=opds-catalog;kind=acquisition" template="/search?title={searchTerms}" />
 </OpenSearchDescription>

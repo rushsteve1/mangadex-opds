@@ -1,15 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{{ .TranslatedLanguage }}">
-
+<?xml version='1.0' encoding='utf-8'?>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
-  <title>{{ .FullTitle }}</title>
-  <link rel="stylesheet" href="css/main.css" type="text/css" />
+  <title>Page #{{ add .Index 1 }}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+  <link rel="stylesheet" type="text/css" href="page_styles.css"/>
 </head>
-
-<body>
-  <!-- TODO image paths in the zip -->
+<body class="calibre">
+<div class="calibre1">
+  <img src="{{ .Name }}" alt="comic page #{{ add .Index 1 }}" class="calibre2"/>
+</div>
 </body>
-
 </html>
