@@ -11,7 +11,7 @@
 
     <body>
         <h1>Mangadex OPDS</h1>
-        <p>Version <code>{{ .Version }}</code></p>
+        <p>Version <code>{{ html .Version }}</code></p>
         <a href="https://github.com/rushsteve1/mangadex-opds">GitHub Repo</a>
 
         <p>
@@ -21,13 +21,13 @@
 
         <div>
             <h2>Root Catalog</h2>
-            <a href="{{ .Host }}/catalog"><code>{{ .Host }}/catalog</code></a>
+            <a href="{{ .Host }}/catalog"><code>{{ html .Host }}/catalog</code></a>
         </div>
 
         <div>
             <h2>Debug Info</h2>
-            <a href="{{ .Host }}/debug/vars">
-                <code>{{ .Host }}/debug/vars</code>
+            <a href="{{ html .Host }}/debug/vars">
+                <code>{{ html .Host }}/debug/vars</code>
             </a>
         </div>
 

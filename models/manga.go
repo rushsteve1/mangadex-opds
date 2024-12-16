@@ -31,7 +31,7 @@ type MangaAttributes struct {
 	UpdatedAt        time.Time           `json:"updatedAt"`
 }
 
-func (m Manga) URL() string {
+func (m *Manga) URL() string {
 	u := shared.GlobalOptions.Host
 	u.Path, _ = url.JoinPath("manga", m.ID.String())
 	return u.String()

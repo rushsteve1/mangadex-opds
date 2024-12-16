@@ -1,8 +1,9 @@
 package formats
 
-/* TODO
 import (
+	"bytes"
 	"context"
+	"github.com/rushsteve1/mangadex-opds/shared"
 	"os"
 	"testing"
 
@@ -10,30 +11,20 @@ import (
 	"github.com/rushsteve1/mangadex-opds/models"
 )
 
+const EPUBChapterSize = 1_188_189
+
 func Test_WriteEpub(t *testing.T) {
+	shared.TestOptions()
+
 	ctx := context.Background()
-	c := models.Chapter{ID: uuid.MustParse(ChapterID)}
 
-	file, err := os.CreateTemp("", "*.epub")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer file.Close()
+	c, err := models.FetchChapter(ctx, uuid.MustParse(ChapterID), nil)
+	shared.AssertEq(t, err, nil)
 
-	t.Log("temp file created at: " + file.Name())
+	buf := bytes.Buffer{}
 
-	err = WriteEpub(ctx, &c, file)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	stats, err := file.Stat()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if stats.Size() == 0 {
-		t.Fatal("size zero")
-	}
+	err = os.Chdir("../../")
+	err = WriteEpub(ctx, &c, &buf)
+	shared.AssertEq(t, err, nil)
+	shared.AssertEq(t, buf.Len(), EPUBChapterSize)
 }
-*/
