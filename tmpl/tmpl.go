@@ -25,7 +25,5 @@ func init() {
 		"ext":    func(s string) string { return path.Ext(s) },
 		"mime":   func(s string) string { return mime.TypeByExtension(path.Ext(s)) },
 	})
-	println(mime.TypeByExtension(".opf"))
-	println(mime.TypeByExtension(".ncx"))
 	tmpl = template.Must(tmpl.ParseFS(tmplFS, "templates/*"))
 }

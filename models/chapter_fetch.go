@@ -39,7 +39,7 @@ func FetchChapter(
 		queryParams[k] = v
 	}
 
-	data, err := shared.QueryAPI[Data[Chapter]](ctx, queryPath, queryParams, nil)
+	data, err := shared.QueryAPI[Data[Chapter]](ctx, queryPath, queryParams)
 	if err != nil {
 		return data.Data, err
 	}
@@ -81,7 +81,7 @@ func (c *Chapter) FetchImageURLs(ctx context.Context) (imgUrls []*url.URL, err e
 		return nil, err
 	}
 
-	resp, err := shared.QueryAPI[imageUrlResponse](ctx, queryPath, nil, nil)
+	resp, err := shared.QueryAPI[imageUrlResponse](ctx, queryPath, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -102,9 +102,9 @@ func (c *Chapter) FetchImageURLs(ctx context.Context) (imgUrls []*url.URL, err e
 	}
 
 	// Pre-allocate the slice
-	imgUrls = make([]*url.URL, len(imgStrs), len(imgStrs))
+	imgUrls = make([]*url.URL, 0, len(imgStrs))
 
-	for i, imgStr := range imgStrs {
+	for _, imgStr := range imgStrs {
 		imgUrl, err := url.Parse(resp.BaseUrl)
 		if err != nil {
 			return nil, err
@@ -115,7 +115,7 @@ func (c *Chapter) FetchImageURLs(ctx context.Context) (imgUrls []*url.URL, err e
 			return nil, err
 		}
 
-		imgUrls[i] = imgUrl
+		imgUrls = append(imgUrls, imgUrl)
 	}
 
 	slog.DebugContext(ctx, "fetched image urls", "count", len(imgUrls))

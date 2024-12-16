@@ -27,6 +27,7 @@ type Options struct {
 	GzipResponses bool       // Enable gzipping responses
 	LogLevel      slog.Level // The log level
 	NoDownload    bool       // Disable downloading images for chapters, used in some tests
+	RetryAmount   int        // Number of times to retry when querying the API
 }
 
 var defaultBind = url.URL{
@@ -90,6 +91,7 @@ func ReadOptionsFromEnv() {
 		ExpVars:       env("EXP_VARS", true),
 		GzipResponses: env("GZIP_RESPONSES", true),
 		LogLevel:      env("LOG_LEVEL", slog.LevelInfo),
+		RetryAmount:   env("RETRY_AMOUNT", 3),
 	}
 
 	loadDotEnv()
@@ -102,13 +104,14 @@ func TestOptions() {
 	slog.Debug("setting test options")
 
 	GlobalOptions = Options{
-		Bind:      defaultBind.Host,
-		Host:      defaultBind,
-		Language:  "en",
-		DataSaver: true,
-		DevApi:    false,
-		ExpVars:   true,
-		LogLevel:  slog.LevelDebug,
+		Bind:        defaultBind.Host,
+		Host:        defaultBind,
+		Language:    "en",
+		DataSaver:   true,
+		DevApi:      false,
+		ExpVars:     true,
+		LogLevel:    slog.LevelDebug,
+		RetryAmount: 1,
 	}
 
 	slog.SetLogLoggerLevel(GlobalOptions.LogLevel)

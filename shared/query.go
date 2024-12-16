@@ -2,11 +2,10 @@ package shared
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/allegro/bigcache/v3"
-	"golang.org/x/time/rate"
 	"io"
 	"log/slog"
 	"mime"
@@ -15,6 +14,9 @@ import (
 	"path"
 	"runtime/debug"
 	"time"
+
+	"github.com/allegro/bigcache/v3"
+	"golang.org/x/time/rate"
 )
 
 // APIUrl is the default MangaDex API URL
@@ -34,7 +36,6 @@ var UploadsURL = url.URL{
 	Scheme: "https",
 	Host:   "uploads.mangadex.org",
 }
-
 
 // cache holds cached responses for image and API requests
 var cache, _ = bigcache.New(context.Background(), bigcache.Config{
@@ -89,6 +90,9 @@ func UserAgent() string {
 	return fmt.Sprintf("%s/%s", path.Base(info.Main.Path), info.Main.Version)
 }
 
+// LIMITER_KEY is the key in Context used for the limiter
+const LIMITER_KEY = "LIMITER"
+
 // QueryAPILimiter limits the rate that QueryAPI is called
 var QueryAPILimiter = rate.NewLimiter(rate.Every(time.Second)/5, 5)
 
@@ -97,7 +101,6 @@ func QueryAPI[T any](
 	ctx context.Context,
 	queryPath string,
 	queryParams url.Values,
-	limiter *rate.Limiter,
 ) (out T, err error) {
 	var queryUrl url.URL
 	if GlobalOptions.DevApi {
@@ -111,6 +114,8 @@ func QueryAPI[T any](
 
 	var entry []byte
 
+	limiter := cmp.Or(ctx.Value(LIMITER_KEY).(*rate.Limiter), QueryAPILimiter)
+
 	entry, err = cache.Get(queryUrl.String())
 	if err == nil {
 		slog.InfoContext(ctx, "loading cache of API", "url", queryUrl.String())
@@ -118,20 +123,14 @@ func QueryAPI[T any](
 		var req *http.Request
 		var res *http.Response
 
-		for i := 0; i < 3; i++ {
+		for i := 0; i < GlobalOptions.RetryAmount; i++ {
 			if res != nil {
 				_ = res.Body.Close()
 			}
 
-			err = QueryAPILimiter.Wait(ctx)
+			err = limiter.Wait(ctx)
 			if err != nil {
 				continue
-			}
-			if limiter != nil {
-				err = limiter.Wait(ctx)
-				if err != nil {
-					continue
-				}
 			}
 
 			req, err = makeRequest(ctx, &queryUrl)
@@ -197,7 +196,6 @@ func QueryImage(
 	ctx context.Context,
 	imgUrl *url.URL,
 	w io.Writer,
-	limiter *rate.Limiter,
 ) (err error) {
 	// In some tests we do not actually want to download the files
 	if GlobalOptions.NoDownload {
@@ -209,26 +207,22 @@ func QueryImage(
 
 	entry, err := cache.Get(imgUrl.String())
 
+	limiter := cmp.Or(ctx.Value(LIMITER_KEY).(*rate.Limiter), QueryImageLimiter)
+
 	if err == nil {
 		slog.InfoContext(ctx, "loading cache of image", "url", imgUrl.String())
 	} else {
 		var req *http.Request
 		var res *http.Response
 
-		for i := 0; i < 3; i++ {
+		for i := 0; i < GlobalOptions.RetryAmount; i++ {
 			if res != nil {
 				_ = res.Body.Close()
 			}
 
-			err = QueryImageLimiter.Wait(ctx)
+			err = limiter.Wait(ctx)
 			if err != nil {
 				continue
-			}
-			if limiter != nil {
-				err = limiter.Wait(ctx)
-				if err != nil {
-					continue
-				}
 			}
 
 			req, err = makeRequest(ctx, imgUrl)

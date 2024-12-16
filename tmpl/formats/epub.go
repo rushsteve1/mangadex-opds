@@ -3,17 +3,20 @@ package formats
 import (
 	"archive/zip"
 	"context"
+	"embed"
 	"fmt"
 	"github.com/rushsteve1/mangadex-opds/shared"
 	"github.com/rushsteve1/mangadex-opds/tmpl"
 	"golang.org/x/sync/errgroup"
 	"io"
 	"log/slog"
-	"os"
 	"path"
 
 	"github.com/rushsteve1/mangadex-opds/models"
 )
+
+//go:embed epub
+var epubFiles embed.FS
 
 // WriteEpub will write an EPUB file for the current [Chapter] to the given [io.Writer].
 func WriteEpub(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
@@ -24,7 +27,7 @@ func WriteEpub(ctx context.Context, c *models.Chapter, w io.Writer) (err error) 
 		return err
 	}
 
-	err = z.AddFS(os.DirFS("tmpl/formats/epub"))
+	err = z.AddFS(epubFiles)
 	if err != nil {
 		return err
 	}
@@ -70,7 +73,7 @@ func WriteEpub(ctx context.Context, c *models.Chapter, w io.Writer) (err error) 
 					Index: i,
 				}
 
-				err := shared.QueryImage(ctx, img, &chImg.Data, nil)
+				err := shared.QueryImage(ctx, img, &chImg.Data)
 				if err != nil {
 					return err
 				}

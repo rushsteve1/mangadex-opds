@@ -2,9 +2,10 @@ package models
 
 import (
 	"context"
-	"github.com/rushsteve1/mangadex-opds/shared"
 	"log/slog"
 	"net/url"
+
+	"github.com/rushsteve1/mangadex-opds/shared"
 
 	"github.com/google/uuid"
 )
@@ -20,7 +21,7 @@ func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Ma
 
 	queryParams = shared.WithDefaultParams(queryParams)
 
-	data, err := shared.QueryAPI[Data[Manga]](ctx, queryPath, queryParams, nil)
+	data, err := shared.QueryAPI[Data[Manga]](ctx, queryPath, queryParams)
 	if err != nil {
 		return m, err
 	}
@@ -36,7 +37,7 @@ func FetchManga(ctx context.Context, id uuid.UUID, queryParams url.Values) (m Ma
 func SearchManga(ctx context.Context, queryParams url.Values) (ms []Manga, err error) {
 	queryParams = shared.WithDefaultParams(queryParams)
 
-	data, err := shared.QueryAPI[Data[[]Manga]](ctx, "manga", queryParams, nil)
+	data, err := shared.QueryAPI[Data[[]Manga]](ctx, "manga", queryParams)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,7 @@ func (m *Manga) Feed(ctx context.Context, queryParams url.Values) (cs []Chapter,
 	queryParams.Add("translatedLanguage[]", shared.GlobalOptions.Language)
 	queryParams.Add("includeEmptyPages", "0")
 
-	data, err := shared.QueryAPI[Data[[]Chapter]](ctx, queryPath, queryParams, nil)
+	data, err := shared.QueryAPI[Data[[]Chapter]](ctx, queryPath, queryParams)
 
 	for i := range data.Data {
 		data.Data[i].manga = m

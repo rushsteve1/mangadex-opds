@@ -58,7 +58,7 @@ func WriteCBZ(ctx context.Context, c *models.Chapter, w io.Writer) (err error) {
 				imgName := path.Base(img.String())
 				chImg := tmpl.ChapterImage{Name: imgName}
 
-				err := shared.QueryImage(ctx, img, &chImg.Data, nil)
+				err := shared.QueryImage(ctx, img, &chImg.Data)
 				if err != nil {
 					return err
 				}
