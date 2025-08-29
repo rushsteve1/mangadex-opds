@@ -11,7 +11,7 @@ import (
 	"github.com/rushsteve1/mangadex-opds/models"
 )
 
-const EPUBChapterSize = 1_188_189
+const EPUBChapterSize = 1_188_157
 
 func Test_WriteEpub(t *testing.T) {
 	shared.TestOptions()

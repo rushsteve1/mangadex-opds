@@ -24,7 +24,7 @@ func Test_FetchManga(t *testing.T) {
 			ID:    MangaID,
 		},
 		{
-			Title: "Oyasumi Punpun",
+			Title: "Goodnight Punpun",
 			ID:    "4301d363-ee02-43f4-ae24-4cbf29a74830",
 		},
 	}
