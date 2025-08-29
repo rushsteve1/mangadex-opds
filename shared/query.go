@@ -2,7 +2,6 @@ package shared
 
 import (
 	"bytes"
-	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -114,7 +113,7 @@ func QueryAPI[T any](
 
 	var entry []byte
 
-	limiter := cmp.Or(ctx.Value(LIMITER_KEY).(*rate.Limiter), QueryAPILimiter)
+	limiter := CastOr(ctx.Value(LIMITER_KEY), QueryAPILimiter)
 
 	entry, err = cache.Get(queryUrl.String())
 	if err == nil {
@@ -207,7 +206,7 @@ func QueryImage(
 
 	entry, err := cache.Get(imgUrl.String())
 
-	limiter := cmp.Or(ctx.Value(LIMITER_KEY).(*rate.Limiter), QueryImageLimiter)
+	limiter := CastOr(ctx.Value(LIMITER_KEY), QueryImageLimiter)
 
 	if err == nil {
 		slog.InfoContext(ctx, "loading cache of image", "url", imgUrl.String())

@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+// CastOr takes a value to cast and an optional fallback,
+// returning the cast value if it matches or the fallback if it does not.
+func CastOr[T any](v any, or *T) *T {
+	x, ok := v.(*T)
+	if ok {
+		return x
+	}
+	return or
+}
+
 // Tr takes a map of translation strings and returns the one matching the language
 // in [GlobalOptions] OR the special `ja-ro` translation OR the fallback string "Unknown".
 func Tr(m map[string]string) string {
